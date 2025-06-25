@@ -218,10 +218,16 @@ def webhook_receiver():
         # Auto tool attachment - find and attach relevant tools based on the prompt
         try:
             print(f"[AUTO_TOOL_ATTACHMENT] Searching for relevant tools for prompt: '{prompt[:100]}...'")
+            
+            # Always keep tool-e34b5c60-5bd5-4288-a97f-2167ddf3062b (important tool that must remain attached)
+            # Keep existing tools with "*" and add the specific tool ID
+            keep_tools_list = ["*", "tool-e34b5c60-5bd5-4288-a97f-2167ddf3062b"]
+            keep_tools_str = ",".join(keep_tools_list)
+            
             tool_result = find_attach_tools(
                 query=prompt,
                 agent_id=agent_id,
-                keep_tools="*",  # Keep existing tools and add relevant ones
+                keep_tools=keep_tools_str,  # Keep existing tools and specific required tool
                 limit=3,  # Limit to 3 new tools to avoid overwhelming
                 min_score=70.0,  # Slightly lower threshold for relevance
                 request_heartbeat=False
