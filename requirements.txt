@@ -1,0 +1,19 @@
+flask==3.0.0
+python-dotenv==1.0.0
+requests==2.31.0
+cerebras-cloud-sdk
+PyYAML==6.0.1
+pycountry
+
+# BigQuery integration for GDELT data
+google-cloud-bigquery
+
+# Optional: For improved semantic retrieval (graceful fallback if not available)
+sentence-transformers==2.2.2
+scikit-learn==1.3.2
+numpy>=1.26.0,<2.0
+
+# Simulation suite dependencies
+pandas>=2.0.0
+matplotlib>=3.7.0
+seaborn>=0.12.0

@@ -1,0 +1,19 @@
+FROM oculair/letta-webhook-receiver:latest
+
+# Copy the updated Flask file with truncation fix
+COPY flask_webhook_receiver.py /app/flask_webhook_receiver.py
+# Copy the updated GDELT integration with URL fix
+COPY demo_gdelt_webhook_integration.py /app/demo_gdelt_webhook_integration.py
+# Copy the updated arXiv integration with 400 error fix
+COPY arxiv_integration.py /app/arxiv_integration.py
+
+# Set working directory and expose port
+WORKDIR /app
+EXPOSE 5005
+
+# Health check using Python instead of curl
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD python -c "import requests; requests.get('http://localhost:5005/health', timeout=5)"
+
+# Run with Gunicorn in production
+CMD ["gunicorn", "--bind", "0.0.0.0:5005", "--workers", "2", "--timeout", "120", "flask_webhook_receiver:app"]

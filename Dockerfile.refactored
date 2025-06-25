@@ -1,0 +1,35 @@
+# Production Dockerfile for the refactored webhook server
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+
+# Set work directory
+WORKDIR /app
+
+# Copy requirements and install Python dependencies
+COPY requirements-light.txt .
+RUN pip install --no-cache-dir -r requirements-light.txt
+
+# Copy all necessary files
+COPY webhook_server/ /app/webhook_server/
+COPY arxiv_integration.py /app/
+COPY demo_gdelt_webhook_integration.py /app/
+
+# Create a proper entry point script
+RUN echo '#!/usr/bin/env python3\nimport sys\nsys.path.insert(0, "/app")\nfrom webhook_server.app import app\nimport argparse\n\nif __name__ == "__main__":\n    parser = argparse.ArgumentParser()\n    parser.add_argument("--host", default="0.0.0.0")\n    parser.add_argument("--port", type=int, default=8290)\n    args = parser.parse_args()\n    app.run(host=args.host, port=args.port, debug=False)' > /app/run_server.py
+
+# Make the script executable
+RUN chmod +x /app/run_server.py
+
+# Expose port
+EXPOSE 8290
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD python -c "import requests; requests.get('http://localhost:8290/health', timeout=5)" || exit 1
+
+# Run the application directly
+CMD ["python", "/app/run_server.py", "--host", "0.0.0.0", "--port", "8290"]

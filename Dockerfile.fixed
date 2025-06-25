@@ -1,0 +1,35 @@
+# Production Dockerfile for the refactored webhook server
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+# Critical: Set PYTHONPATH so imports work correctly
+ENV PYTHONPATH=/app
+
+# Set work directory
+WORKDIR /app
+
+# Copy requirements and install Python dependencies
+COPY requirements-light.txt .
+RUN pip install --no-cache-dir -r requirements-light.txt
+
+# Copy the webhook_server package
+COPY webhook_server/ /app/webhook_server/
+
+# Copy integration files to root where they're expected
+COPY arxiv_integration.py /app/
+COPY demo_gdelt_webhook_integration.py /app/
+
+# Copy the entry point script
+COPY run_server.py /app/
+
+# Expose port
+EXPOSE 8290
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD python -c "import requests; requests.get('http://localhost:8290/health', timeout=5)" || exit 1
+
+# Run the application using the entry point script
+CMD ["python", "/app/run_server.py", "--host", "0.0.0.0", "--port", "8290"]

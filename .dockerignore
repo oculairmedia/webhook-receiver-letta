@@ -1,0 +1,99 @@
+# Version control
+.git
+.gitignore
+
+# Python cache and build files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Test and development files
+test_*.py
+*_test.py
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Environment files (keep .env.example)
+.env.prod
+.env.local
+.env.development
+.env.test
+
+# Docker files (not needed inside container)
+Dockerfile*
+docker-compose*.yml
+compose*.yaml
+
+# Development scripts
+run-*.sh
+run-*.bat
+
+# Large data files
+*.log
+*.txt
+*.csv
+*.json
+!requirements.txt
+!requirements-light.txt
+
+# Cache directories
+.cache/
+.npm/
+.yarn/
+node_modules/
+
+# Temporary files
+tmp/
+temp/

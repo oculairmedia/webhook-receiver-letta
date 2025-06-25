@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python test:*)",
+      "Bash(python3:*)",
+      "Bash(ls:*)",
+      "Bash(source:*)",
+      "Bash(pip install:*)",
+      "Bash(./venvsource/Scripts/pip.exe install pandas matplotlib seaborn)",
+      "Bash(./venvsource/Scripts/python.exe test_simulation.py)",
+      "Bash(./venvsource/Scripts/python.exe arxiv_integration.py)",
+      "Bash(./venvsource/Scripts/python.exe test_arxiv_simulation.py)",
+      "Bash(docker:*)",
+      "Bash(curl:*)",
+      "Bash(grep:*)",
+      "Bash(./venvsource/Scripts/python.exe test_arxiv_fix.py)",
+      "Bash(./venvsource/Scripts/python.exe test_arxiv_simple.py)"
+    ],
+    "deny": []
+  }
+}

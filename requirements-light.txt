@@ -1,0 +1,21 @@
+flask==3.0.0
+python-dotenv==1.0.0
+requests==2.31.0
+urllib3>=1.26.0
+cerebras-cloud-sdk
+PyYAML==6.0.1
+pycountry
+
+# BigQuery integration for GDELT data
+google-cloud-bigquery
+
+# Basic data manipulation without ML dependencies
+pandas>=2.0.0
+
+# Core dependencies without heavy ML/visualization packages
+# Excluded for light build:
+# sentence-transformers==2.2.2  # Pulls in PyTorch
+# scikit-learn==1.3.2           # Heavy ML package
+# numpy>=1.26.0,<2.0           # Will be installed by pandas anyway
+# matplotlib>=3.7.0            # Visualization not needed in prod
+# seaborn>=0.12.0              # Visualization not needed in prod

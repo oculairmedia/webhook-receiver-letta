@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  webhook-receiver:
+    image: oculair/letta-webhook-receiver:latest
+    container_name: letta-webhook-receiver
+    ports:
+      - "5005:5005"
+    environment:
+      - FLASK_ENV=production
+      # Core API Configuration
+      - GRAPHITI_URL=${GRAPHITI_URL:-http://192.168.50.90:8001/api}
+      - LETTA_BASE_URL=${LETTA_BASE_URL:-https://letta2.oculair.ca}
+      - LETTA_PASSWORD=${LETTA_PASSWORD:-lettaSecurePass123}
+      - CEREBRAS_API_KEY=${CEREBRAS_API_KEY}
+      # Context Retrieval Configuration
+      - GRAPHITI_MAX_NODES=${GRAPHITI_MAX_NODES:-5}
+      - GRAPHITI_MAX_FACTS=${GRAPHITI_MAX_FACTS:-15}
+      - GRAPHITI_WEIGHT_LAST_MESSAGE=${GRAPHITI_WEIGHT_LAST_MESSAGE:-0.6}
+      - GRAPHITI_WEIGHT_PREVIOUS_ASSISTANT_MESSAGE=${GRAPHITI_WEIGHT_PREVIOUS_ASSISTANT_MESSAGE:-0.25}
+      - GRAPHITI_WEIGHT_PRIOR_USER_MESSAGE=${GRAPHITI_WEIGHT_PRIOR_USER_MESSAGE:-0.15}
+      # External Query Configuration
+      - EXTERNAL_QUERY_ENABLED=${EXTERNAL_QUERY_ENABLED:-true}
+      - EXTERNAL_QUERY_API_URL=${EXTERNAL_QUERY_API_URL:-http://192.168.50.90:5401/}
+      - EXTERNAL_QUERY_TIMEOUT=${EXTERNAL_QUERY_TIMEOUT:-10}
+      # Query Refinement Configuration
+      - QUERY_REFINEMENT_ENABLED=${QUERY_REFINEMENT_ENABLED:-true}
+      - QUERY_REFINEMENT_TEMPERATURE=${QUERY_REFINEMENT_TEMPERATURE:-0.3}
+      # Application Configuration
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
+    restart: unless-stopped
+    networks:
+      - letta-network
+
+networks:
+  letta-network:
+    driver: bridge
