@@ -3,6 +3,10 @@ import json
 import os
 import sys
 import requests
+import threading
+import random
+import asyncio
+from datetime import datetime, UTC
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from flask import Flask, request, jsonify
@@ -15,16 +19,77 @@ from .context_utils import _build_cumulative_context
 # Add the parent directory to the path to import tool_manager
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tool_manager import find_attach_tools
+from letta_tool_utils import get_find_tools_id_with_fallback
 
 app = Flask(__name__)
+
+# Agent tracking for Matrix notifications
+MATRIX_CLIENT_URL = os.environ.get("MATRIX_CLIENT_URL", "http://192.168.50.90:8004")
+known_agents = set()
+agent_tracking_lock = threading.Lock()
+
+def track_agent_and_notify(agent_id: str) -> None:
+    """Track agent and notify Matrix client if new agent is detected."""
+    if not agent_id or not agent_id.startswith("agent-"):
+        return
+    
+    with agent_tracking_lock:
+        if agent_id not in known_agents:
+            print(f"[AGENT_TRACKER] New agent detected: {agent_id}")
+            known_agents.add(agent_id)
+            
+            # Notify Matrix client in background thread
+            def notify_matrix():
+                try:
+                    notify_url = f"{MATRIX_CLIENT_URL}/webhook/new-agent"
+                    payload = {"agent_id": agent_id, "timestamp": datetime.now(UTC).isoformat()}
+                    response = requests.post(notify_url, json=payload, timeout=5)
+                    if response.status_code == 200:
+                        print(f"[AGENT_TRACKER] Successfully notified Matrix client about new agent: {agent_id}")
+                    else:
+                        print(f"[AGENT_TRACKER] Failed to notify Matrix client: {response.status_code} - {response.text}")
+                except Exception as e:
+                    print(f"[AGENT_TRACKER] Error notifying Matrix client: {e}")
+            
+            # Run notification in background to avoid blocking webhook processing
+            threading.Thread(target=notify_matrix, daemon=True).start()
+        else:
+            print(f"[AGENT_TRACKER] Known agent: {agent_id}")
 
 @app.route('/health', methods=['GET'])
 def health():
     """Health check endpoint for Docker."""
-    return jsonify({"status": "healthy", "service": "webhook-server"}), 200
+    return jsonify({
+        "status": "healthy", 
+        "service": "webhook-server",
+        "matrix_client_url": MATRIX_CLIENT_URL,
+        "timestamp": datetime.now(UTC).isoformat()
+    }), 200
+
+@app.route("/agent-tracker/status", methods=["GET"])
+def agent_tracker_status():
+    """Get current status of agent tracking."""
+    with agent_tracking_lock:
+        return jsonify({
+            "known_agents": list(known_agents),
+            "agent_count": len(known_agents),
+            "matrix_client_url": MATRIX_CLIENT_URL,
+            "timestamp": datetime.now(UTC).isoformat()
+        })
+
+@app.route("/agent-tracker/reset", methods=["POST"])
+def reset_agent_tracker():
+    """Reset the agent tracking state (for testing)."""
+    with agent_tracking_lock:
+        old_count = len(known_agents)
+        known_agents.clear()
+        return jsonify({
+            "message": f"Reset agent tracker. Removed {old_count} agents.",
+            "timestamp": datetime.now(UTC).isoformat()
+        })
 
 # Graphiti configuration
-GRAPHITI_API_URL = os.environ.get("GRAPHITI_URL", "http://192.168.50.90:8001/api")
+GRAPHITI_API_URL = os.environ.get("GRAPHITI_URL", "http://192.168.50.90:8001")
 DEFAULT_MAX_NODES = int(os.environ.get("GRAPHITI_MAX_NODES", "8"))
 DEFAULT_MAX_FACTS = int(os.environ.get("GRAPHITI_MAX_FACTS", "20"))
 
@@ -42,7 +107,7 @@ def query_graphiti_api(query: str, max_nodes: int = None, max_facts: int = None)
         graphiti_url = GRAPHITI_API_URL
         if not graphiti_url:
             print(f"[GRAPHITI] Warning: Empty graphiti_url provided, using default")
-            graphiti_url = "http://192.168.50.90:8001/api"
+            graphiti_url = "http://192.168.50.90:8001"
         
         # Configure session with retry logic
         session = requests.Session()
@@ -57,7 +122,7 @@ def query_graphiti_api(query: str, max_nodes: int = None, max_facts: int = None)
         
         # Use the improved Graphiti API approach with proper parameters
         search_url_nodes = f"{graphiti_url}/search/nodes"
-        search_url_facts = f"{graphiti_url}/search/facts"
+        search_url_facts = f"{graphiti_url}/search"
         
         print(f"[GRAPHITI] Searching nodes at {search_url_nodes}")
         
@@ -103,8 +168,18 @@ def query_graphiti_api(query: str, max_nodes: int = None, max_facts: int = None)
         
         if "facts" in search_results and search_results["facts"]:
             print(f"[GRAPHITI] Processing {len(search_results['facts'])} facts")
+            # Deduplicate facts by text content
+            seen_facts = set()
+            unique_facts = []
             for fact in search_results["facts"]:
-                context_parts.append(f"Fact: {fact.get('summary', 'N/A')}")
+                fact_text = fact.get('fact', 'N/A')
+                if fact_text not in seen_facts and fact_text != 'N/A':
+                    seen_facts.add(fact_text)
+                    unique_facts.append(fact_text)
+            
+            print(f"[GRAPHITI] After deduplication: {len(unique_facts)} unique facts")
+            for fact_text in unique_facts:
+                context_parts.append(f"Fact: {fact_text}")
         
         if not context_parts:
             fallback_msg = f"No relevant information found in Graphiti for query: '{query}' (searched {max_nodes} nodes, {max_facts} facts)"
@@ -199,6 +274,10 @@ def webhook_receiver():
         print(f"[WEBHOOK_DEBUG]   Event type: {event_type}")
         print(f"[WEBHOOK_DEBUG]   Agent ID: {agent_id}")
         print(f"[WEBHOOK_DEBUG]   Prompt: {prompt}")
+        
+        # Track agent for Matrix notifications
+        if agent_id:
+            track_agent_and_notify(agent_id)
 
         if not agent_id or not prompt:
             print(f"[WEBHOOK_DEBUG] Missing agent_id or prompt - returning 400")
@@ -219,9 +298,10 @@ def webhook_receiver():
         try:
             print(f"[AUTO_TOOL_ATTACHMENT] Searching for relevant tools for prompt: '{prompt[:100]}...'")
             
-            # Always keep tool-e34b5c60-5bd5-4288-a97f-2167ddf3062b (important tool that must remain attached)
-            # Keep existing tools with "*" and add the specific tool ID
-            keep_tools_list = ["*", "tool-e34b5c60-5bd5-4288-a97f-2167ddf3062b"]
+            # Dynamically lookup the find_tools tool ID using the agent's attached tools
+            # Keep existing tools with "*" and add the dynamically found tool ID
+            find_tools_id = get_find_tools_id_with_fallback(agent_id=agent_id)
+            keep_tools_list = ["*", find_tools_id]
             keep_tools_str = ",".join(keep_tools_list)
             
             tool_result = find_attach_tools(

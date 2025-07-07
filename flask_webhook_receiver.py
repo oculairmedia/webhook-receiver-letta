@@ -15,6 +15,7 @@ from datetime import datetime, UTC
 import requests
 
 from flask import Flask, request, jsonify
+import threading
 
 # Import arXiv integration
 try:
@@ -40,11 +41,44 @@ LETTA_API_HEADERS = {
 # Maximum context snippet length for cumulative context
 MAX_CONTEXT_SNIPPET_LENGTH = 6000
 
+# Agent tracking for Matrix notifications
+MATRIX_CLIENT_URL = os.environ.get("MATRIX_CLIENT_URL", "http://192.168.50.90:8004")
+known_agents = set()
+agent_tracking_lock = threading.Lock()
+
 def get_api_url(path: str) -> str:
     """Construct API URL following Letta's v1 convention."""
     base = f"{LETTA_BASE_URL}/v1".rstrip("/")
     path = path.lstrip("/")
     return f"{base}/{path}"
+
+def track_agent_and_notify(agent_id: str) -> None:
+    """Track agent and notify Matrix client if new agent is detected."""
+    if not agent_id or not agent_id.startswith("agent-"):
+        return
+    
+    with agent_tracking_lock:
+        if agent_id not in known_agents:
+            print(f"[AGENT_TRACKER] New agent detected: {agent_id}")
+            known_agents.add(agent_id)
+            
+            # Notify Matrix client in background thread
+            def notify_matrix():
+                try:
+                    notify_url = f"{MATRIX_CLIENT_URL}/webhook/new-agent"
+                    payload = {"agent_id": agent_id, "timestamp": datetime.now(UTC).isoformat()}
+                    response = requests.post(notify_url, json=payload, timeout=5)
+                    if response.status_code == 200:
+                        print(f"[AGENT_TRACKER] Successfully notified Matrix client about new agent: {agent_id}")
+                    else:
+                        print(f"[AGENT_TRACKER] Failed to notify Matrix client: {response.status_code} - {response.text}")
+                except Exception as e:
+                    print(f"[AGENT_TRACKER] Error notifying Matrix client: {e}")
+            
+            # Run notification in background to avoid blocking webhook processing
+            threading.Thread(target=notify_matrix, daemon=True).start()
+        else:
+            print(f"[AGENT_TRACKER] Known agent: {agent_id}")
 
 def find_context_block(agent_id: str) -> tuple[Optional[dict], bool]:
     """
@@ -1306,7 +1340,7 @@ except ImportError:
             # Handle empty or None graphiti_url
             if not graphiti_url:
                 print(f"[FALLBACK DEBUG] Warning: Empty graphiti_url provided, using default")
-                graphiti_url = "http://192.168.50.90:8001/api"
+                graphiti_url = "http://192.168.50.90:8001"
             
             # Use the improved Graphiti API approach with proper parameters and retry logic
             search_url_nodes = f"{graphiti_url}/search/nodes"
@@ -1408,7 +1442,7 @@ except ImportError:
             return ' '.join(text_parts)
         else:
             return str(content)
-    DEFAULT_GRAPHITI_URL = "http://localhost:8001/api" # Fallback
+    DEFAULT_GRAPHITI_URL = "http://localhost:8001" # Fallback
     DEFAULT_MAX_NODES = 3
     DEFAULT_MAX_FACTS = 5
     DEFAULT_WEIGHT_LAST_MESSAGE = 0.6
@@ -1594,6 +1628,8 @@ def letta_webhook_receiver():
             print("[AGENT_ID_EXTRACTION] Final agent_id is None. Block will be global.")
         else:
             print(f"[AGENT_ID_EXTRACTION] Final agent_id is '{agent_id}'. Block will be agent-specific.")
+            # Track agent for Matrix notifications
+            track_agent_and_notify(agent_id)
         
         # Generate context
         print("\n" + "="*80)
@@ -2064,7 +2100,34 @@ def letta_webhook_receiver():
 
 @app.route("/health", methods=["GET"])
 def health_check():
-    return jsonify({"status": "healthy"})
+    """Health check endpoint."""
+    return jsonify({
+        "status": "healthy",
+        "timestamp": datetime.now(UTC).isoformat(),
+        "matrix_client_url": MATRIX_CLIENT_URL
+    })
+
+@app.route("/agent-tracker/status", methods=["GET"])
+def agent_tracker_status():
+    """Get current status of agent tracking."""
+    with agent_tracking_lock:
+        return jsonify({
+            "known_agents": list(known_agents),
+            "agent_count": len(known_agents),
+            "matrix_client_url": MATRIX_CLIENT_URL,
+            "timestamp": datetime.now(UTC).isoformat()
+        })
+
+@app.route("/agent-tracker/reset", methods=["POST"])
+def reset_agent_tracker():
+    """Reset the agent tracking state (for testing)."""
+    with agent_tracking_lock:
+        old_count = len(known_agents)
+        known_agents.clear()
+        return jsonify({
+            "message": f"Reset agent tracker. Removed {old_count} agents.",
+            "timestamp": datetime.now(UTC).isoformat()
+        })
 
 # --- Main execution ---
 if __name__ == "__main__":

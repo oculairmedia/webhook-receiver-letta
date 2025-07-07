@@ -19,7 +19,7 @@ from urllib3.util.retry import Retry
 import logging
 from llm_clients.cerebras_qwen_client import CerebrasQwenClient, CerebrasError
 # Default configuration
-DEFAULT_GRAPHITI_URL = "http://192.168.50.90:8001/api"
+DEFAULT_GRAPHITI_URL = "http://192.168.50.90:8001"
 DEFAULT_MAX_NODES = 8  # Increased to return more entities
 DEFAULT_MAX_FACTS = 20 # Increased to show more relationship details
 

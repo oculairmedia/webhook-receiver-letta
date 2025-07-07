@@ -34,7 +34,12 @@ services:
     restart: unless-stopped
     networks:
       - letta-network
+      - letta-proxy-network
 
 networks:
   letta-network:
-    driver: bridge
+    external: true
+    name: letta_network
+  letta-proxy-network:
+    external: true
+    name: letta-proxy_letta-net
