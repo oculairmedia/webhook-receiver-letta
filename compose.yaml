@@ -3,7 +3,10 @@ version: '3.8'
 services:
   # Main Letta Webhook Receiver Service
   webhook-receiver:
-    image: oculair/letta-webhook-receiver:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: letta-webhook-receiver-new:latest
     container_name: letta-webhook-receiver
     ports:
       - "5005:5005"

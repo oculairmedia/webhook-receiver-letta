@@ -21,11 +21,11 @@ COPY tool_manager.py .
 COPY letta_tool_utils.py .
 
 # Expose port
-EXPOSE 8290
+EXPOSE 5005
 
 # Health check (optional, but good practice)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD python -c "import requests; requests.get('http://localhost:8290/health', timeout=5)" || exit 1
+  CMD python -c "import requests; requests.get('http://localhost:5005/health', timeout=5)" || exit 1
 
 # Run the application
-CMD ["python", "-m", "webhook_server.app", "--host", "0.0.0.0", "--port", "8290"]
+CMD ["python", "-m", "webhook_server.app", "--host", "0.0.0.0", "--port", "5005"]
