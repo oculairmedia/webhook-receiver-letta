@@ -7,6 +7,9 @@ from typing import List, Dict, Optional, Any # Added for better type hinting
 # Retrieve Letta password from environment or use a default
 LETTA_PASSWORD = os.environ.get("LETTA_PASSWORD", "lettaSecurePass123")
 
+# Agent registry configuration
+AGENT_REGISTRY_URL = os.environ.get("AGENT_REGISTRY_URL", "http://192.168.50.90:8021")
+
 def get_agent_tools(agent_id: str) -> List[str]: # Return type is List of strings (tool IDs)
     """
     Get the list of tools currently attached to an agent.
@@ -167,6 +170,73 @@ def find_attach_tools(query: str = None, agent_id: str = None, keep_tools: str =
         return f"Error during tool attachment request: {str(e)}"
     except Exception as e: # Catch any other unexpected error
         print(f"Unexpected error in find_attach_tools (:8020): {type(e).__name__} - {str(e)}", file=sys.stderr)
+        return f"Error: An unexpected error occurred: {str(e)}"
+
+
+def find_agents(query: str, limit: int = 10, min_score: float = 0.3) -> str:
+    """
+    Search for relevant agents in the agent registry based on a query.
+    
+    Args:
+        query (str): Your search query - what kind of agent are you looking for?
+        limit (int): Maximum number of agents to return (default: 10)
+        min_score (float): Minimum relevance score 0-1 (default: 0.3)
+    
+    Returns:
+        str: Formatted list of agents or error message
+    """
+    url = f"{AGENT_REGISTRY_URL}/api/v1/agents/search"
+    params = {
+        "query": query,
+        "limit": limit,
+        "min_score": min_score
+    }
+    
+    try:
+        print(f"Searching for agents with query: '{query}' (limit={limit}, min_score={min_score})", file=sys.stdout)
+        response = requests.get(url, params=params, timeout=15)
+        response.raise_for_status()
+        
+        result = response.json()
+        agents = result.get("agents", [])
+        
+        if not agents:
+            return f"No relevant agents found for query: '{query}'"
+        
+        # Format the results
+        output_parts = [f"Found {len(agents)} relevant agents:\n"]
+        
+        for agent in agents:
+            agent_id = agent.get("agent_id", "unknown")
+            name = agent.get("name", "Unknown Agent")
+            description = agent.get("description", "No description")
+            score = agent.get("score", 0.0)
+            status = agent.get("status", "unknown")
+            capabilities = agent.get("capabilities", [])
+            
+            agent_info = f"\n• {name} (ID: {agent_id})"
+            agent_info += f"\n  Status: {status}"
+            agent_info += f"\n  Relevance: {score:.2f}"
+            agent_info += f"\n  Description: {description[:150]}{'...' if len(description) > 150 else ''}"
+            
+            if capabilities:
+                agent_info += f"\n  Capabilities: {', '.join(capabilities[:3])}"
+            
+            output_parts.append(agent_info)
+        
+        output_parts.append("\n\nYou can message these agents using the matrix_agent_message tool with their agent ID.")
+        
+        return "\n".join(output_parts)
+        
+    except requests.exceptions.HTTPError as http_err:
+        error_msg = f"HTTP {http_err.response.status_code if http_err.response else 'Unknown'}"
+        print(f"HTTPError in find_agents: {str(http_err)}", file=sys.stderr)
+        return f"Error searching for agents: {error_msg}"
+    except requests.exceptions.RequestException as e:
+        print(f"RequestException in find_agents: {str(e)}", file=sys.stderr)
+        return f"Error during agent search request: {str(e)}"
+    except Exception as e:
+        print(f"Unexpected error in find_agents: {type(e).__name__} - {str(e)}", file=sys.stderr)
         return f"Error: An unexpected error occurred: {str(e)}"
 
 

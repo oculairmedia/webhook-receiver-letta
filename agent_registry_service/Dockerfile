@@ -16,6 +16,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app.py .
 COPY ollama_embeddings.py .
 COPY sync_service.py .
+COPY mcp_server.py .
 
 # Expose port
 EXPOSE 8020
