@@ -114,11 +114,9 @@ services:
     container_name: agent-registry-mcp
     command: python mcp_server.py
     ports:
-      - "8022:8022"
+      - "8022:8000"
     environment:
       AGENT_REGISTRY_URL: "http://agent-registry:8021"
-      AGENT_REGISTRY_MCP_HOST: "0.0.0.0"
-      AGENT_REGISTRY_MCP_PORT: "8022"
       AGENT_REGISTRY_MCP_LOG_LEVEL: "INFO"
       AGENT_REGISTRY_MAX_AGENTS: "10"
       AGENT_REGISTRY_MIN_SCORE: "0.3"
