@@ -105,6 +105,8 @@ services:
     networks:
       - agent-registry-network
       - letta-network
+    healthcheck:
+      disable: true
 
   # Agent Registry MCP Server
   agent-registry-mcp:
@@ -125,6 +127,8 @@ services:
     restart: unless-stopped
     networks:
       - agent-registry-network
+    healthcheck:
+      disable: true
 
 volumes:
   weaviate_data:
