@@ -112,7 +112,7 @@ services:
       context: ./agent_registry_service
       dockerfile: Dockerfile
     container_name: agent-registry-mcp
-    command: python mcp_server.py
+    command: bash -c "pip install -r requirements-mcp.txt && fastmcp run mcp_server.py --transport http --port 8000 --host 0.0.0.0"
     ports:
       - "8022:8000"
     environment:

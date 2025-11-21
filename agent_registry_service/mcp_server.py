@@ -169,7 +169,8 @@ async def get_registry_stats() -> dict:
 
 def main() -> None:
     """Entrypoint for running the FastMCP server over HTTP transport."""
-    port = int(os.environ.get("AGENT_REGISTRY_MCP_PORT", "8022"))
+    host = os.environ.get("AGENT_REGISTRY_MCP_HOST", "0.0.0.0")
+    port = int(os.environ.get("AGENT_REGISTRY_MCP_PORT", "8000"))
     
     log_level = os.environ.get("AGENT_REGISTRY_MCP_LOG_LEVEL", "INFO").upper()
     logging.basicConfig(
@@ -177,15 +178,17 @@ def main() -> None:
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
     
-    LOGGER.info(f"Starting Agent Registry FastMCP server on port {port}")
+    LOGGER.info(f"Starting Agent Registry FastMCP server on http://{host}:{port}")
     LOGGER.info(f"Agent Registry URL: {AGENT_REGISTRY_URL}")
+    LOGGER.info(f"MCP endpoint will be available at http://{host}:{port}/mcp")
     
-    # SSE is the HTTP transport for MCP (Server-Sent Events over HTTP)
-    # Set host and port via environment variables for uvicorn
-    os.environ["UVICORN_HOST"] = "0.0.0.0"
-    os.environ["UVICORN_PORT"] = str(port)
+    # Set environment variables for uvicorn (used by FastMCP)
+    os.environ["HOST"] = host
+    os.environ["PORT"] = str(port)
     
-    mcp.run(transport="sse")
+    # Use HTTP transport (Streamable HTTP protocol for full bidirectional communication)
+    # Note: host and port are configured via environment variables
+    mcp.run(transport="http")
 
 
 if __name__ == "__main__":
