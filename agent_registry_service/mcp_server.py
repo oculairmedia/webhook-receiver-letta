@@ -180,7 +180,7 @@ def main() -> None:
     LOGGER.info(f"Starting Agent Registry FastMCP server on port {port}")
     LOGGER.info(f"Agent Registry URL: {AGENT_REGISTRY_URL}")
     
-    # Use uvicorn to run the FastMCP server
+    # SSE is the HTTP transport for MCP (Server-Sent Events over HTTP)
     # Set host and port via environment variables for uvicorn
     os.environ["UVICORN_HOST"] = "0.0.0.0"
     os.environ["UVICORN_PORT"] = str(port)
