@@ -14,9 +14,9 @@ from urllib3.util.retry import Retry
 
 
 # Agent registry configuration
-AGENT_REGISTRY_URL = os.environ.get("AGENT_REGISTRY_URL", "http://192.168.50.90:8020")
-DEFAULT_MAX_AGENTS = int(os.environ.get("AGENT_REGISTRY_MAX_AGENTS", "5"))
-DEFAULT_MIN_SCORE = float(os.environ.get("AGENT_REGISTRY_MIN_SCORE", "0.5"))
+AGENT_REGISTRY_URL = os.environ.get("AGENT_REGISTRY_URL", "http://192.168.50.90:8021")
+DEFAULT_MAX_AGENTS = int(os.environ.get("AGENT_REGISTRY_MAX_AGENTS", "10"))
+DEFAULT_MIN_SCORE = float(os.environ.get("AGENT_REGISTRY_MIN_SCORE", "0.3"))
 
 # Letta API configuration for fetching agent details
 LETTA_API_URL = os.environ.get("LETTA_API_URL", "https://letta.oculair.ca/v1")
@@ -127,7 +127,7 @@ def register_agent(agent_id: str) -> bool:
         }
         
         # Call agent registry service
-        url = f"{AGENT_REGISTRY_URL}/agents/register"
+        url = f"{AGENT_REGISTRY_URL}/api/v1/agents/register"
         headers = {"Content-Type": "application/json"}
         
         print(f"[AGENT_REGISTRY] Registering agent {agent_id} at {url}")
@@ -175,7 +175,7 @@ def query_agent_registry(query: str, limit: int = None, min_score: float = None)
         session.mount("https://", adapter)
         
         # Query agent registry
-        search_url = f"{AGENT_REGISTRY_URL}/agents/search"
+        search_url = f"{AGENT_REGISTRY_URL}/api/v1/agents/search"
         params = {
             "query": query,
             "limit": limit,

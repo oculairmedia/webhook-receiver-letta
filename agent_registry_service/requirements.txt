@@ -1,6 +1,4 @@
 flask==3.0.0
 weaviate-client==4.9.3
-sentence-transformers==2.2.2
-torch>=2.0.0
-numpy>=1.26.0,<2.0
+requests>=2.31.0
 python-dotenv==1.0.0

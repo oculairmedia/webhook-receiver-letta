@@ -21,19 +21,22 @@ from flask import Flask, request, jsonify
 import weaviate
 from weaviate.classes.config import Configure, Property, DataType
 from weaviate.classes.query import Filter
-from sentence_transformers import SentenceTransformer
+from ollama_embeddings import OllamaEmbeddingProvider
 
 # Configuration
-WEAVIATE_URL = os.environ.get("WEAVIATE_URL", "http://192.168.50.90:8080")
-EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
+WEAVIATE_URL = os.environ.get("WEAVIATE_URL", "http://weaviate:8080")
+EMBEDDING_PROVIDER = os.environ.get("EMBEDDING_PROVIDER", "ollama")
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://192.168.50.80:11434")
+OLLAMA_MODEL = os.environ.get("OLLAMA_EMBEDDING_MODEL", "dengcao/Qwen3-Embedding-4B:Q4_K_M")
+EMBEDDING_DIMENSION = int(os.environ.get("EMBEDDING_DIMENSION", "2560"))
 COLLECTION_NAME = "Agent"
 
 # Initialize Flask app
 app = Flask(__name__)
 
-# Global variables for Weaviate client and embedding model
+# Global variables for Weaviate client and embedding provider
 weaviate_client = None
-embedding_model = None
+embedding_provider = None
 
 
 def init_weaviate_client():
@@ -79,26 +82,31 @@ def init_weaviate_client():
         return False
 
 
-def init_embedding_model():
-    """Initialize sentence-transformers embedding model."""
-    global embedding_model
+def init_embedding_provider():
+    """Initialize Ollama embedding provider."""
+    global embedding_provider
     
     try:
-        print(f"[REGISTRY] Loading embedding model: {EMBEDDING_MODEL}")
-        embedding_model = SentenceTransformer(EMBEDDING_MODEL)
-        print(f"[REGISTRY] Embedding model loaded successfully")
+        print(f"[REGISTRY] Initializing {EMBEDDING_PROVIDER} embedding provider")
+        print(f"[REGISTRY] Model: {OLLAMA_MODEL}, Dimensions: {EMBEDDING_DIMENSION}")
+        embedding_provider = OllamaEmbeddingProvider(
+            base_url=OLLAMA_BASE_URL,
+            model=OLLAMA_MODEL,
+            dimensions=EMBEDDING_DIMENSION
+        )
+        print(f"[REGISTRY] Embedding provider initialized successfully")
         return True
     except Exception as e:
-        print(f"[REGISTRY] Error loading embedding model: {e}")
+        print(f"[REGISTRY] Error loading embedding provider: {e}")
         return False
 
 
 def generate_embedding(text: str) -> List[float]:
     """Generate embedding vector for text."""
-    if embedding_model is None:
-        raise RuntimeError("Embedding model not initialized")
+    if embedding_provider is None:
+        raise RuntimeError("Embedding provider not initialized")
     
-    return embedding_model.encode(text).tolist()
+    return embedding_provider.get_embedding(text)
 
 
 def format_agent_for_response(agent_obj) -> Dict[str, Any]:
@@ -120,10 +128,10 @@ def format_agent_for_response(agent_obj) -> Dict[str, Any]:
 def health_check():
     """Health check endpoint."""
     weaviate_status = "connected" if weaviate_client else "disconnected"
-    embedding_status = "loaded" if embedding_model else "not loaded"
+    embedding_status = "loaded" if embedding_provider else "not loaded"
     
     return jsonify({
-        "status": "healthy" if weaviate_client and embedding_model else "degraded",
+        "status": "healthy" if weaviate_client and embedding_provider else "degraded",
         "service": "agent-registry",
         "weaviate": weaviate_status,
         "embedding_model": embedding_status,
@@ -382,8 +390,8 @@ if __name__ == "__main__":
         print("[REGISTRY] Failed to initialize Weaviate client. Exiting.")
         sys.exit(1)
     
-    if not init_embedding_model():
-        print("[REGISTRY] Failed to initialize embedding model. Exiting.")
+    if not init_embedding_provider():
+        print("[REGISTRY] Failed to initialize embedding provider. Exiting.")
         sys.exit(1)
     
     print("[REGISTRY] Agent Registry Service initialized successfully")

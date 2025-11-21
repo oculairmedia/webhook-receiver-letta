@@ -323,7 +323,7 @@ def webhook_receiver():
         # Agent discovery - find relevant agents for collaboration
         try:
             print(f"[AGENT_DISCOVERY] Searching for relevant agents for prompt: '{prompt[:100]}...'")
-            agent_results = query_agent_registry(query=prompt, limit=5, min_score=0.5)
+            agent_results = query_agent_registry(query=prompt, limit=10, min_score=0.3)
             
             if agent_results.get("success") and agent_results.get("agents"):
                 # Create memory block with available agents
