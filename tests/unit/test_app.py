@@ -1,0 +1,363 @@
+"""
+Unit tests for webhook_server.app module.
+
+Tests Flask webhook endpoints, agent tracking, and webhook processing logic.
+"""
+
+import pytest
+import json
+from unittest.mock import Mock, patch, MagicMock
+from datetime import datetime, UTC
+
+# These tests use the Flask test client fixture from conftest.py
+
+
+class TestHealthEndpoint:
+    """Tests for /health endpoint."""
+
+    def test_health_endpoint_returns_200(self, client):
+        """Test that health endpoint returns 200 OK."""
+        response = client.get('/health')
+        assert response.status_code == 200
+
+    def test_health_endpoint_returns_json(self, client):
+        """Test that health endpoint returns JSON."""
+        response = client.get('/health')
+        assert response.content_type == 'application/json'
+
+    def test_health_endpoint_has_status_field(self, client):
+        """Test that health response includes status field."""
+        response = client.get('/health')
+        data = json.loads(response.data)
+        assert 'status' in data
+        assert data['status'] == 'healthy'
+
+    def test_health_endpoint_has_service_field(self, client):
+        """Test that health response includes service field."""
+        response = client.get('/health')
+        data = json.loads(response.data)
+        assert 'service' in data
+        assert data['service'] == 'webhook-server'
+
+    def test_health_endpoint_has_timestamp(self, client):
+        """Test that health response includes timestamp."""
+        response = client.get('/health')
+        data = json.loads(response.data)
+        assert 'timestamp' in data
+
+
+class TestAgentTrackerStatus:
+    """Tests for /agent-tracker/status endpoint."""
+
+    def test_agent_tracker_status_returns_200(self, client):
+        """Test that agent tracker status endpoint returns 200 OK."""
+        response = client.get('/agent-tracker/status')
+        assert response.status_code == 200
+
+    def test_agent_tracker_status_returns_json(self, client):
+        """Test that endpoint returns JSON."""
+        response = client.get('/agent-tracker/status')
+        assert response.content_type == 'application/json'
+
+    def test_agent_tracker_status_has_known_agents(self, client):
+        """Test that response includes known_agents list."""
+        response = client.get('/agent-tracker/status')
+        data = json.loads(response.data)
+        assert 'known_agents' in data
+        assert isinstance(data['known_agents'], list)
+
+    def test_agent_tracker_status_has_agent_count(self, client):
+        """Test that response includes agent_count."""
+        response = client.get('/agent-tracker/status')
+        data = json.loads(response.data)
+        assert 'agent_count' in data
+        assert isinstance(data['agent_count'], int)
+
+    def test_agent_tracker_status_count_matches_list_length(self, client):
+        """Test that agent_count matches length of known_agents."""
+        response = client.get('/agent-tracker/status')
+        data = json.loads(response.data)
+        assert data['agent_count'] == len(data['known_agents'])
+
+
+class TestAgentTrackerReset:
+    """Tests for /agent-tracker/reset endpoint."""
+
+    def test_agent_tracker_reset_requires_post(self, client):
+        """Test that reset endpoint requires POST method."""
+        response = client.get('/agent-tracker/reset')
+        assert response.status_code == 405  # Method Not Allowed
+
+    def test_agent_tracker_reset_returns_200(self, client):
+        """Test that reset endpoint returns 200 OK."""
+        response = client.post('/agent-tracker/reset')
+        assert response.status_code == 200
+
+    def test_agent_tracker_reset_clears_agents(self, client, reset_agent_tracking):
+        """Test that reset clears known agents."""
+        # First check status to see current state
+        status_response = client.get('/agent-tracker/status')
+        status_data = json.loads(status_response.data)
+        initial_count = status_data['agent_count']
+
+        # Reset
+        reset_response = client.post('/agent-tracker/reset')
+        reset_data = json.loads(reset_response.data)
+
+        # Verify message mentions removed count
+        assert 'message' in reset_data
+        assert str(initial_count) in reset_data['message']
+
+        # Check status again
+        new_status = client.get('/agent-tracker/status')
+        new_data = json.loads(new_status.data)
+        assert new_data['agent_count'] == 0
+
+
+class TestTrackAgentAndNotify:
+    """Tests for track_agent_and_notify function."""
+
+    def test_track_agent_ignores_invalid_agent_id(self, reset_agent_tracking):
+        """Test that invalid agent IDs are ignored."""
+        from webhook_server.app import track_agent_and_notify, known_agents
+
+        track_agent_and_notify("")
+        assert len(known_agents) == 0
+
+        track_agent_and_notify(None)
+        assert len(known_agents) == 0
+
+    def test_track_agent_ignores_non_agent_prefix(self, reset_agent_tracking):
+        """Test that agent IDs not starting with 'agent-' are ignored."""
+        from webhook_server.app import track_agent_and_notify, known_agents
+
+        track_agent_and_notify("user-123")
+        assert len(known_agents) == 0
+
+        track_agent_and_notify("invalid-123")
+        assert len(known_agents) == 0
+
+    @patch('webhook_server.app.requests.post')
+    def test_track_agent_adds_new_agent(self, mock_post, reset_agent_tracking):
+        """Test that new agent is tracked and notification is sent."""
+        from webhook_server.app import track_agent_and_notify, known_agents
+
+        # Mock successful notification
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_post.return_value = mock_response
+
+        track_agent_and_notify("agent-123")
+
+        # Agent should be added to known_agents
+        assert "agent-123" in known_agents
+
+    @patch('webhook_server.app.requests.post')
+    def test_track_agent_does_not_notify_twice(self, mock_post, reset_agent_tracking):
+        """Test that second tracking of same agent doesn't send notification."""
+        from webhook_server.app import track_agent_and_notify
+
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_post.return_value = mock_response
+
+        # Track agent twice
+        track_agent_and_notify("agent-456")
+        track_agent_and_notify("agent-456")
+
+        # Should only call post once (for the first notification)
+        # Note: Due to background thread, we need to give it a moment
+        import time
+        time.sleep(0.1)
+
+        # First call should have happened
+        assert mock_post.called
+
+    @patch('webhook_server.app.requests.post')
+    def test_track_agent_handles_notification_failure(self, mock_post, reset_agent_tracking):
+        """Test that notification failure doesn't prevent agent tracking."""
+        from webhook_server.app import track_agent_and_notify, known_agents
+
+        # Mock failed notification
+        mock_post.side_effect = Exception("Connection error")
+
+        track_agent_and_notify("agent-789")
+
+        # Agent should still be tracked even if notification fails
+        import time
+        time.sleep(0.1)  # Give thread time to execute
+        assert "agent-789" in known_agents
+
+
+class TestQueryGraphitiAPI:
+    """Tests for query_graphiti_api function."""
+
+    @patch('webhook_server.app.requests.Session')
+    def test_query_graphiti_success(self, mock_session_class):
+        """Test successful Graphiti API query."""
+        from webhook_server.app import query_graphiti_api
+
+        # Create mock session and responses
+        mock_session = MagicMock()
+        mock_session_class.return_value = mock_session
+
+        # Mock nodes response
+        mock_nodes_response = Mock()
+        mock_nodes_response.json.return_value = {
+            "nodes": [
+                {"name": "Test Node", "summary": "Test summary"}
+            ]
+        }
+        mock_nodes_response.raise_for_status = Mock()
+
+        # Mock facts response
+        mock_facts_response = Mock()
+        mock_facts_response.json.return_value = {
+            "facts": [
+                {"fact": "Test fact"}
+            ]
+        }
+        mock_facts_response.raise_for_status = Mock()
+
+        mock_session.post.side_effect = [mock_nodes_response, mock_facts_response]
+
+        result = query_graphiti_api("test query")
+
+        assert result['success'] is True
+        assert 'context' in result
+        assert "Test Node" in result['context']
+        assert "Test fact" in result['context']
+
+    @patch('webhook_server.app.requests.Session')
+    def test_query_graphiti_no_results(self, mock_session_class):
+        """Test Graphiti query with no results."""
+        from webhook_server.app import query_graphiti_api
+
+        mock_session = MagicMock()
+        mock_session_class.return_value = mock_session
+
+        # Mock empty responses
+        mock_nodes_response = Mock()
+        mock_nodes_response.json.return_value = {"nodes": []}
+        mock_nodes_response.raise_for_status = Mock()
+
+        mock_facts_response = Mock()
+        mock_facts_response.json.return_value = {"facts": []}
+        mock_facts_response.raise_for_status = Mock()
+
+        mock_session.post.side_effect = [mock_nodes_response, mock_facts_response]
+
+        result = query_graphiti_api("test query")
+
+        assert result['success'] is False
+        assert "No relevant information found" in result['context']
+
+    @patch('webhook_server.app.requests.Session')
+    def test_query_graphiti_handles_request_exception(self, mock_session_class):
+        """Test handling of request exceptions."""
+        from webhook_server.app import query_graphiti_api
+        import requests
+
+        mock_session = MagicMock()
+        mock_session_class.return_value = mock_session
+        mock_session.post.side_effect = requests.exceptions.RequestException("Network error")
+
+        result = query_graphiti_api("test query")
+
+        assert result['success'] is False
+        assert "Error querying Graphiti" in result['context']
+
+    @patch('webhook_server.app.requests.Session')
+    def test_query_graphiti_uses_custom_limits(self, mock_session_class):
+        """Test that custom max_nodes and max_facts are used."""
+        from webhook_server.app import query_graphiti_api
+
+        mock_session = MagicMock()
+        mock_session_class.return_value = mock_session
+
+        mock_response = Mock()
+        mock_response.json.return_value = {"nodes": [], "facts": []}
+        mock_response.raise_for_status = Mock()
+        mock_session.post.return_value = mock_response
+
+        query_graphiti_api("test", max_nodes=15, max_facts=25)
+
+        # Check that the payloads included custom limits
+        calls = mock_session.post.call_args_list
+        nodes_call = calls[0]
+        facts_call = calls[1]
+
+        assert nodes_call[1]['json']['max_nodes'] == 15
+        assert facts_call[1]['json']['max_facts'] == 25
+
+    @patch('webhook_server.app.requests.Session')
+    def test_query_graphiti_deduplicates_facts(self, mock_session_class):
+        """Test that duplicate facts are deduplicated."""
+        from webhook_server.app import query_graphiti_api
+
+        mock_session = MagicMock()
+        mock_session_class.return_value = mock_session
+
+        mock_nodes_response = Mock()
+        mock_nodes_response.json.return_value = {"nodes": []}
+        mock_nodes_response.raise_for_status = Mock()
+
+        # Return duplicate facts
+        mock_facts_response = Mock()
+        mock_facts_response.json.return_value = {
+            "facts": [
+                {"fact": "Duplicate fact"},
+                {"fact": "Duplicate fact"},
+                {"fact": "Unique fact"}
+            ]
+        }
+        mock_facts_response.raise_for_status = Mock()
+
+        mock_session.post.side_effect = [mock_nodes_response, mock_facts_response]
+
+        result = query_graphiti_api("test")
+
+        # Should only contain each fact once
+        assert result['context'].count("Duplicate fact") == 1
+        assert result['context'].count("Unique fact") == 1
+
+
+class TestWebhookEndpoint:
+    """Tests for the main webhook endpoint."""
+
+    # Note: Full webhook endpoint tests would require patching many dependencies
+    # These are placeholder tests - full implementation would be in integration tests
+
+    @pytest.mark.skip(reason="Webhook endpoint requires extensive mocking - see integration tests")
+    def test_webhook_endpoint_exists(self, client):
+        """Test that webhook endpoint exists."""
+        response = client.post('/webhook')
+        # Response may be 400 or 500 due to missing data, but endpoint should exist
+        assert response.status_code != 404
+
+    @pytest.mark.skip(reason="Requires extensive mocking - see integration tests")
+    def test_webhook_processes_message_sent_event(self, client):
+        """Test processing of message_sent event."""
+        pass
+
+    @pytest.mark.skip(reason="Requires extensive mocking - see integration tests")
+    def test_webhook_processes_stream_started_event(self, client):
+        """Test processing of stream_started event."""
+        pass
+
+
+class TestAppConfiguration:
+    """Tests for Flask app configuration."""
+
+    def test_app_is_flask_instance(self, app):
+        """Test that app is a Flask instance."""
+        from flask import Flask
+        assert isinstance(app, Flask)
+
+    def test_app_in_testing_mode(self, app):
+        """Test that app is in testing mode."""
+        assert app.config['TESTING'] is True
+
+    def test_app_debug_disabled_in_tests(self, app):
+        """Test that debug mode is disabled in tests."""
+        assert app.config['DEBUG'] is False

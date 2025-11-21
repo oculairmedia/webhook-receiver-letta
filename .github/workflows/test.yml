@@ -1,0 +1,135 @@
+name: Tests and Coverage
+
+on:
+  push:
+    branches: [ main, develop, claude/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run unit tests
+      run: |
+        pytest tests/unit/ -v --tb=short --cov=webhook_server --cov=tool_manager --cov=letta_tool_utils --cov-report=term-missing
+
+    - name: Run integration tests
+      run: |
+        pytest tests/integration/ -v --tb=short
+
+    - name: Generate coverage report
+      run: |
+        pytest --cov=webhook_server --cov=tool_manager --cov=letta_tool_utils --cov-report=xml:coverage.xml --cov-report=html:htmlcov
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+    - name: Archive coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-reports-${{ matrix.python-version }}
+        path: |
+          coverage.xml
+          htmlcov/
+        retention-days: 7
+
+    - name: Check coverage threshold
+      run: |
+        # Extract coverage percentage and check if it meets minimum threshold
+        COVERAGE=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); root = tree.getroot(); print(float(root.attrib['line-rate']) * 100)")
+        echo "Current coverage: $COVERAGE%"
+        # Minimum threshold is 70%
+        if (( $(echo "$COVERAGE < 70" | bc -l) )); then
+          echo "Coverage $COVERAGE% is below minimum threshold of 70%"
+          exit 1
+        fi
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install linting tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black isort
+
+    - name: Run flake8
+      run: |
+        # Stop the build if there are Python syntax errors or undefined names
+        flake8 webhook_server/ tool_manager.py letta_tool_utils.py --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Exit-zero treats all errors as warnings
+        flake8 webhook_server/ tool_manager.py letta_tool_utils.py --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Check code formatting with black
+      run: |
+        black --check webhook_server/ tool_manager.py letta_tool_utils.py || echo "Code formatting issues found - run 'black .' to fix"
+
+    - name: Check import sorting with isort
+      run: |
+        isort --check-only webhook_server/ tool_manager.py letta_tool_utils.py || echo "Import sorting issues found - run 'isort .' to fix"
+
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install safety bandit
+
+    - name: Run safety check
+      run: |
+        pip install -r requirements.txt
+        safety check --json || echo "Security vulnerabilities found in dependencies"
+
+    - name: Run bandit security scan
+      run: |
+        bandit -r webhook_server/ tool_manager.py letta_tool_utils.py -f json -o bandit-report.json || echo "Security issues found"
+
+    - name: Upload security reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-reports
+        path: bandit-report.json
+        retention-days: 7

@@ -446,3 +446,162 @@ run_server.py             - Entry point with CLI args
 - Graphiti timeout rate > 10%
 - Memory block errors > 5%
 - Context truncation > 80% of requests
+## 🧪 Testing
+
+### Test Infrastructure
+
+This project uses `pytest` with comprehensive test coverage including unit tests, integration tests, and end-to-end tests.
+
+**Current Test Coverage**: Target 80%+ overall, 90%+ for critical modules
+
+### Running Tests
+
+#### Run All Tests
+```bash
+pytest
+```
+
+#### Run Unit Tests Only
+```bash
+pytest tests/unit/ -v
+```
+
+#### Run Integration Tests
+```bash
+pytest tests/integration/ -v
+```
+
+#### Run E2E Tests
+```bash
+pytest tests/e2e/ -v
+```
+
+#### Run with Coverage Report
+```bash
+pytest --cov=webhook_server --cov=tool_manager --cov=letta_tool_utils --cov-report=html
+```
+
+View the coverage report: `open htmlcov/index.html`
+
+#### Run Specific Test File
+```bash
+pytest tests/unit/test_context_utils.py -v
+```
+
+#### Run Tests Matching Pattern
+```bash
+pytest -k "test_graphiti" -v
+```
+
+### Test Categories
+
+#### Unit Tests (`tests/unit/`)
+Test individual functions and classes in isolation:
+- `test_config.py` - Configuration loading and validation
+- `test_context_utils.py` - Context building, deduplication, truncation
+- `test_memory_manager.py` - Memory block operations
+- `test_block_finders.py` - Block finding logic
+- `test_tool_manager.py` - Tool attachment functionality
+- `test_app.py` - Flask endpoints and agent tracking
+
+#### Integration Tests (`tests/integration/`)
+Test interactions with external services (mocked):
+- `test_graphiti.py` - Graphiti API connectivity and error handling
+- `test_letta_api.py` - Letta memory block operations
+- `test_tool_service.py` - Tool discovery and attachment API
+- `test_matrix_client.py` - Matrix notification service
+
+#### E2E Tests (`tests/e2e/`)
+Test complete workflows from end to end:
+- `test_webhook_flow.py` - Complete webhook processing pipeline
+- Performance benchmarks (target: < 3s per webhook)
+
+### Test Quality Standards
+
+- **Isolation**: Tests don't depend on each other
+- **Repeatability**: Same results on every run
+- **Coverage**: Minimum 70%, target 80%
+- **Speed**: Unit tests < 100ms, integration tests < 1s
+- **Clarity**: Descriptive names and docstrings
+
+### Continuous Integration
+
+Tests run automatically on:
+- Every push to `main`, `develop`, or `claude/*` branches
+- Every pull request
+- Python versions: 3.11, 3.12
+
+CI pipeline includes:
+1. Unit and integration tests
+2. Coverage reporting
+3. Code linting (flake8)
+4. Security scanning (bandit, safety)
+
+View CI status in GitHub Actions.
+
+### Contributing Tests
+
+When adding new features:
+1. Write tests first (TDD approach recommended)
+2. Ensure all tests pass: `pytest`
+3. Check coverage: `pytest --cov`
+4. Verify coverage doesn't decrease
+5. Follow testing guidelines in [CONTRIBUTING.md](CONTRIBUTING.md)
+
+### Common Test Patterns
+
+#### Testing with Mocks
+```python
+from unittest.mock import patch, Mock
+
+@patch('webhook_server.app.query_graphiti_api')
+def test_webhook_with_graphiti(mock_graphiti, client):
+    mock_graphiti.return_value = {"success": True, "context": "Test"}
+    response = client.post('/webhook', json={"agent_id": "test"})
+    assert response.status_code == 200
+```
+
+#### Testing API Calls
+```python
+import responses
+
+@responses.activate
+def test_graphiti_api_call():
+    responses.add(
+        responses.POST,
+        "http://graphiti.example.com/search",
+        json={"nodes": []},
+        status=200
+    )
+    result = query_graphiti_api("test")
+    assert result['success'] is True
+```
+
+### Debugging Tests
+
+#### Run with Verbose Output
+```bash
+pytest -vv
+```
+
+#### Show Print Statements
+```bash
+pytest -s
+```
+
+#### Stop on First Failure
+```bash
+pytest -x
+```
+
+#### Run Last Failed Tests
+```bash
+pytest --lf
+```
+
+#### Debug with PDB
+```bash
+pytest --pdb
+```
+
+For more details, see [CONTRIBUTING.md](CONTRIBUTING.md) and [TESTING_PLAN.md](TESTING_PLAN.md).
