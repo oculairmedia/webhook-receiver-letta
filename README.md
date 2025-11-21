@@ -9,6 +9,7 @@ A production-ready Flask-based webhook receiver that integrates with Letta agent
 - **💾 Memory Management**: Automatic cumulative context building with smart truncation (4800 char limit)
 - **🔧 Tool Auto-Attachment**: Dynamic tool discovery and attachment based on agent prompts
 - **👥 Agent Tracking**: New agent detection with Matrix client notifications
+- **🤝 Agent Discovery & Registry**: Semantic search for relevant agents and auto-registration (NEW!)
 
 **Note**: ArXiv and GDELT integrations are currently disabled but remain in codebase for future reactivation.
 
@@ -50,7 +51,17 @@ The webhook service processes incoming Letta agent requests through a multi-stag
                      │
                      ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│              4. TOOL AUTO-ATTACHMENT                            │
+│              4. AGENT DISCOVERY (NEW!)                          │
+│  query_agent_registry(query, limit, min_score)                  │
+│  • Semantic search for relevant agents                          │
+│  • Create/update "available_agents" memory block                │
+│  • Show top 5 agents with capabilities & status                 │
+│  • Non-blocking: continues on failure                           │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              5. TOOL AUTO-ATTACHMENT                            │
 │  find_attach_tools(query, agent_id)                             │
 │  • Search for relevant tools based on prompt                    │
 │  • Preserve existing tools + find_tools utility                 │
@@ -70,8 +81,9 @@ The webhook service processes incoming Letta agent requests through a multi-stag
 **Typical Request Time**: 1-3 seconds
 - Graphiti queries: ~500ms-1s (nodes + facts)
 - Memory block operations: ~200-500ms
+- Agent discovery: ~300-800ms (semantic search)
 - Tool attachment: ~500ms-1s
-- Total: ~1.2-2.5s (sequential)
+- Total: ~1.5-3.3s (sequential)
 
 **External Dependencies**:
 | Service | Port | Purpose | Timeout |
@@ -143,10 +155,13 @@ The following environment variables can be configured:
 - `LETTA_BASE_URL`: Base URL for the Letta API (default: https://letta2.oculair.ca)
 - `LETTA_PASSWORD`: Password for Letta API authentication (default: lettaSecurePass123)
 - `MATRIX_CLIENT_URL`: Matrix client for agent notifications (default: http://192.168.50.90:8004)
+- `AGENT_REGISTRY_URL`: URL of the agent registry service (default: http://192.168.50.90:8020)
 
 #### Context Retrieval Configuration
 - `GRAPHITI_MAX_NODES`: Maximum nodes to retrieve from knowledge graph (default: 8)
 - `GRAPHITI_MAX_FACTS`: Maximum facts to retrieve from knowledge graph (default: 20)
+- `AGENT_REGISTRY_MAX_AGENTS`: Maximum agents to show in discovery (default: 5)
+- `AGENT_REGISTRY_MIN_SCORE`: Minimum relevance score 0-1 for agents (default: 0.5)
 
 ### Configuration Examples
 
@@ -220,6 +235,8 @@ docker compose up -d
 - `[WEBHOOK_DEBUG]` - Request/response details
 - `[GRAPHITI]` - Graphiti API operations
 - `[AGENT_TRACKER]` - Agent tracking/notifications
+- `[AGENT_REGISTRY]` - Agent registration and discovery
+- `[AGENT_DISCOVERY]` - Agent search operations
 - `[AUTO_TOOL_ATTACHMENT]` - Tool attachment operations
 - `[attach_block_to_agent]` - Memory block operations
 - `[_build_cumulative_context]` - Context building logic

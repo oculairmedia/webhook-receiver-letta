@@ -15,6 +15,7 @@ from .config import get_api_url
 from .memory_manager import create_memory_block
 from .integrations import arxiv_integration, gdelt_integration
 from .context_utils import _build_cumulative_context
+from .agent_registry import register_agent, query_agent_registry, format_agent_context
 
 # Add the parent directory to the path to import tool_manager
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -29,7 +30,7 @@ known_agents = set()
 agent_tracking_lock = threading.Lock()
 
 def track_agent_and_notify(agent_id: str) -> None:
-    """Track agent and notify Matrix client if new agent is detected."""
+    """Track agent and notify Matrix client if new agent is detected. Also registers agent with agent registry."""
     if not agent_id or not agent_id.startswith("agent-"):
         return
     
@@ -38,8 +39,9 @@ def track_agent_and_notify(agent_id: str) -> None:
             print(f"[AGENT_TRACKER] New agent detected: {agent_id}")
             known_agents.add(agent_id)
             
-            # Notify Matrix client in background thread
-            def notify_matrix():
+            # Background tasks for new agent
+            def notify_and_register():
+                # 1. Notify Matrix client
                 try:
                     notify_url = f"{MATRIX_CLIENT_URL}/webhook/new-agent"
                     payload = {"agent_id": agent_id, "timestamp": datetime.now(UTC).isoformat()}
@@ -50,9 +52,20 @@ def track_agent_and_notify(agent_id: str) -> None:
                         print(f"[AGENT_TRACKER] Failed to notify Matrix client: {response.status_code} - {response.text}")
                 except Exception as e:
                     print(f"[AGENT_TRACKER] Error notifying Matrix client: {e}")
+                
+                # 2. Register with agent registry
+                try:
+                    print(f"[AGENT_TRACKER] Registering agent {agent_id} with agent registry...")
+                    success = register_agent(agent_id)
+                    if success:
+                        print(f"[AGENT_TRACKER] Successfully registered agent {agent_id} with agent registry")
+                    else:
+                        print(f"[AGENT_TRACKER] Failed to register agent {agent_id} with agent registry")
+                except Exception as e:
+                    print(f"[AGENT_TRACKER] Error registering agent with registry: {e}")
             
-            # Run notification in background to avoid blocking webhook processing
-            threading.Thread(target=notify_matrix, daemon=True).start()
+            # Run both tasks in background to avoid blocking webhook processing
+            threading.Thread(target=notify_and_register, daemon=True).start()
         else:
             print(f"[AGENT_TRACKER] Known agent: {agent_id}")
 
@@ -306,6 +319,27 @@ def webhook_receiver():
             "metadata": {"source": "webhook", "event_type": event_type}
         }
         create_memory_block(block_data, agent_id)
+
+        # Agent discovery - find relevant agents for collaboration
+        try:
+            print(f"[AGENT_DISCOVERY] Searching for relevant agents for prompt: '{prompt[:100]}...'")
+            agent_results = query_agent_registry(query=prompt, limit=5, min_score=0.5)
+            
+            if agent_results.get("success") and agent_results.get("agents"):
+                # Create memory block with available agents
+                agent_context = format_agent_context(agent_results)
+                agent_block_data = {
+                    "label": "available_agents",
+                    "value": agent_context,
+                    "metadata": {"source": "agent_registry", "event_type": event_type}
+                }
+                create_memory_block(agent_block_data, agent_id)
+                print(f"[AGENT_DISCOVERY] Found {len(agent_results['agents'])} relevant agents")
+            else:
+                print(f"[AGENT_DISCOVERY] No relevant agents found or query failed")
+        except Exception as e:
+            print(f"[AGENT_DISCOVERY] Error during agent discovery: {e}")
+            # Don't fail the whole webhook if agent discovery fails
 
         # Auto tool attachment - find and attach relevant tools based on the prompt
         try:
