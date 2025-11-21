@@ -111,3 +111,6 @@ Thumbs.db
 *.seed.lockfile
 *.seedfile
 *.seedfile.lock
+
+# Archive directory (old tests, docs, scripts)
+archive/

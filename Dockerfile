@@ -18,6 +18,7 @@ COPY webhook_server/ /app/webhook_server
 # Copy other necessary files
 COPY arxiv_integration.py .
 COPY tool_manager.py .
+COPY letta_tool_utils.py .
 
 # Expose port
 EXPOSE 8290

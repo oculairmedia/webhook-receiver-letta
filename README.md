@@ -1,51 +1,107 @@
-# Letta Webhook Receiver with Enhanced Knowledge Retrieval
+# Letta Webhook Receiver with Graphiti Knowledge Integration
 
-A Flask-based webhook receiver that connects to Graphiti for retrieving context with advanced semantic filtering and query enhancement capabilities.
+A production-ready Flask-based webhook receiver that integrates with Letta agents to provide contextual knowledge from Graphiti's semantic knowledge graph. Features automatic memory management, tool attachment, and agent tracking.
 
-## 🎯 Enhanced Retrieval Features
+## 🎯 Current Features
 
-This webhook service includes production-ready improved retrieval strategies that significantly enhance the relevance of retrieved context:
+**Active Integrations:**
+- **🧠 Graphiti Knowledge Graph**: Semantic search across nodes and facts with deduplication
+- **💾 Memory Management**: Automatic cumulative context building with smart truncation (4800 char limit)
+- **🔧 Tool Auto-Attachment**: Dynamic tool discovery and attachment based on agent prompts
+- **👥 Agent Tracking**: New agent detection with Matrix client notifications
 
-- **🧠 Semantic Relevance Filtering**: Uses sentence transformers to calculate actual semantic similarity between queries and retrieved content
-- **🔍 Query Enhancement**: Automatically generates domain-specific query variants for better coverage (e.g., "AI" → "artificial intelligence machine learning")
-- **⚡ Dynamic Result Optimization**: Returns fewer but higher-quality results with adaptive relevance thresholds
-- **🔄 Graceful Fallbacks**: Works even when semantic libraries are unavailable, falling back to keyword matching
-- **📊 Quality Metrics**: Provides relevance scores and debugging information for transparency
-- **🎯 Bias Correction**: Specifically designed to improve retrieval relevance even with biased or system-focused knowledge graphs
+**Note**: ArXiv and GDELT integrations are currently disabled but remain in codebase for future reactivation.
 
-### Performance Improvements
+## 🔥 Request Hotpath & Architecture
 
-**Before Enhancement**: Generic system entities about webhooks/infrastructure
-**After Enhancement**:
-- Python queries: 0.795 avg relevance with actual Python code/implementation content
-- AI queries: 0.573 avg relevance with real AI integration and agentic systems
-- Domain queries: 0.538+ avg relevance with contextually relevant technical content
+### Overview
+The webhook service processes incoming Letta agent requests through a multi-stage pipeline that retrieves context from Graphiti, manages memory blocks, and attaches relevant tools.
 
-## 🗃️ BigQuery GDELT Integration
+### Request Flow
 
-This service now includes intelligent BigQuery GDELT (Global Database of Events, Language, and Tone) integration that automatically provides global event context when relevant:
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    1. WEBHOOK RECEIPT                           │
+│  POST /webhook or /webhook/letta                                │
+│  • Extract agent_id and prompt from webhook payload             │
+│  • Support for message_sent and stream_started events           │
+│  • Track new agents for Matrix notifications                    │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              2. CONTEXT GENERATION (Graphiti)                   │
+│  generate_context_from_prompt(prompt, agent_id)                 │
+│  • Query Graphiti API for semantic nodes & facts                │
+│  • Deduplicate facts by text content                            │
+│  • Format context with node summaries and facts                 │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              3. MEMORY BLOCK MANAGEMENT                         │
+│  create_memory_block(block_data, agent_id)                      │
+│  • Find or create "graphiti_context" block                      │
+│  • Build cumulative context with timestamps                     │
+│  • Deduplicate similar entries                                  │
+│  • Truncate oldest entries if > 4800 chars                      │
+│  • Auto-attach block to agent if needed                         │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              4. TOOL AUTO-ATTACHMENT                            │
+│  find_attach_tools(query, agent_id)                             │
+│  • Search for relevant tools based on prompt                    │
+│  • Preserve existing tools + find_tools utility                 │
+│  • Attach up to 3 new tools (min_score: 70.0)                   │
+│  • Non-blocking: continues on failure                           │
+└────────────────────┬────────────────────────────────────────────┘
+                     │
+                     ▼
+              ┌──────────────┐
+              │   RESPONSE   │
+              │  200 OK      │
+              └──────────────┘
+```
 
-- **🌍 Smart Event Detection**: Automatically detects queries about global events, news, politics, and geopolitical topics
-- **📊 Rich Data Retrieval**: Pulls detailed event data from GDELT's comprehensive database including actors, locations, sentiment, and sources
-- **🧠 Dual Memory System**: Creates separate "bigquery" memory blocks alongside "graphiti_context" blocks for structured vs. semantic data
-- **⚡ Contextual Triggering**: Only invokes BigQuery when the Cerebras model determines it would be valuable
-- **🔧 Configurable Queries**: Uses verbose GDELT queries by default but supports custom query types
+### Performance Characteristics
 
-### BigQuery Features
+**Typical Request Time**: 1-3 seconds
+- Graphiti queries: ~500ms-1s (nodes + facts)
+- Memory block operations: ~200-500ms
+- Tool attachment: ~500ms-1s
+- Total: ~1.2-2.5s (sequential)
 
-- **Event Analysis**: Recent global events with detailed actor, location, and sentiment data
-- **Source Attribution**: Includes URLs and source information for fact-checking
-- **Geographic Context**: Full location names and country codes for spatial understanding
-- **Temporal Tracking**: Timestamps and date information for chronological context
-- **Tone Analysis**: Sentiment scores from -100 (very negative) to +100 (very positive)
+**External Dependencies**:
+| Service | Port | Purpose | Timeout |
+|---------|------|---------|---------|
+| Graphiti API | 8003/8001 | Knowledge graph search | 30s |
+| Letta API | 8283 | Memory blocks & agents | Default |
+| Tool Attachment | 8020 | Tool discovery & attachment | 15s |
+| Matrix Client | 8004 | New agent notifications | 5s |
 
-### Triggering Keywords
+### Key Implementation Details
 
-BigQuery is automatically invoked for queries containing terms like:
-- Global events: "news", "events", "world", "international", "politics"
-- Geographic: country names, regions, "diplomatic", "foreign policy"
-- Event types: "conflict", "protest", "cooperation", "crisis", "sanctions"
-- Direct requests: "gdelt", "bigquery", "recent events"
+**Memory Block Management**:
+- Max context length: 4800 chars (under Letta's 5000 char limit)
+- Timestamp-based deduplication
+- Preserves most recent entries when truncating
+- Auto-attaches blocks to agents
+
+**Graphiti Integration**:
+- Parallel queries for nodes and facts
+- Retry strategy: 3 attempts with backoff
+- Fact deduplication by text content
+- Default limits: 8 nodes, 20 facts (configurable)
+
+**Tool Attachment**:
+- Non-blocking (webhook continues on failure)
+- Preserves existing tools via "*" wildcard
+- Min relevance score: 70.0
+- Limit: 3 new tools per request
+
+For detailed component documentation, see **Technical Deep Dive** section below.
 
 ## Running with Docker Compose
 
@@ -83,98 +139,36 @@ chmod +x run-webhook-service.sh
 The following environment variables can be configured:
 
 #### Core API Configuration
-- `GRAPHITI_URL`: URL of the Graphiti API (default: http://192.168.50.90:8001/api)
+- `GRAPHITI_URL`: URL of the Graphiti API (default: http://192.168.50.90:8003)
 - `LETTA_BASE_URL`: Base URL for the Letta API (default: https://letta2.oculair.ca)
 - `LETTA_PASSWORD`: Password for Letta API authentication (default: lettaSecurePass123)
-- `CEREBRAS_API_KEY`: API key for Cerebras query refinement service
+- `MATRIX_CLIENT_URL`: Matrix client for agent notifications (default: http://192.168.50.90:8004)
 
 #### Context Retrieval Configuration
-- `GRAPHITI_MAX_NODES`: Maximum number of nodes to retrieve from knowledge graph (default: 2)
-- `GRAPHITI_MAX_FACTS`: Maximum number of facts to retrieve from knowledge graph (default: 10)
-- `GRAPHITI_WEIGHT_LAST_MESSAGE`: Weight for the last message in context retrieval (default: 0.6)
-- `GRAPHITI_WEIGHT_PREVIOUS_ASSISTANT_MESSAGE`: Weight for the previous assistant message (default: 0.25)
-- `GRAPHITI_WEIGHT_PRIOR_USER_MESSAGE`: Weight for the prior user message (default: 0.15)
-
-#### Enhanced Retrieval Configuration
-- `RETRIEVAL_RELEVANCE_THRESHOLD`: Minimum semantic similarity score to include results (default: 0.25)
-- `RETRIEVAL_MAX_RESULTS`: Maximum number of results to return after filtering (default: 3)
-- `RETRIEVAL_ENABLE_QUERY_EXPANSION`: Enable automatic query expansion with domain variants (default: true)
-- `RETRIEVAL_FALLBACK_TO_KEYWORD`: Use keyword matching when semantic models unavailable (default: true)
-
-#### External Query API Configuration
-- `EXTERNAL_QUERY_ENABLED`: Enable/disable external query API calls (default: true)
-- `EXTERNAL_QUERY_API_URL`: URL for external query API (default: http://192.168.50.90:5401/)
-- `EXTERNAL_QUERY_TIMEOUT`: Timeout for external API calls in seconds (default: 10)
-
-#### Query Refinement Configuration
-- `QUERY_REFINEMENT_ENABLED`: Enable/disable AI-powered query refinement (default: true)
-- `QUERY_REFINEMENT_TEMPERATURE`: Temperature for query refinement AI model (default: 0.3)
-
-#### Application Configuration
-- `LOG_LEVEL`: Logging level (default: INFO, options: DEBUG, INFO, WARNING, ERROR)
-- `DEBUG_MODE`: Enable debug mode for additional logging (default: false)
+- `GRAPHITI_MAX_NODES`: Maximum nodes to retrieve from knowledge graph (default: 8)
+- `GRAPHITI_MAX_FACTS`: Maximum facts to retrieve from knowledge graph (default: 20)
 
 ### Configuration Examples
 
-#### High-Performance Setup with Enhanced Retrieval
+#### Default Setup (Recommended)
 ```bash
-GRAPHITI_MAX_NODES=5
+GRAPHITI_URL=http://192.168.50.90:8003
+GRAPHITI_MAX_NODES=8
 GRAPHITI_MAX_FACTS=20
-EXTERNAL_QUERY_ENABLED=true
-QUERY_REFINEMENT_ENABLED=true
-# Enhanced retrieval settings for maximum relevance
-RETRIEVAL_RELEVANCE_THRESHOLD=0.3
-RETRIEVAL_MAX_RESULTS=5
-RETRIEVAL_ENABLE_QUERY_EXPANSION=true
+LETTA_BASE_URL=https://letta2.oculair.ca
+MATRIX_CLIENT_URL=http://192.168.50.90:8004
 ```
 
-#### Balanced Setup (Recommended)
+#### High-Context Setup
+```bash
+GRAPHITI_MAX_NODES=15
+GRAPHITI_MAX_FACTS=30
+```
+
+#### Minimal Setup (Faster)
 ```bash
 GRAPHITI_MAX_NODES=3
-GRAPHITI_MAX_FACTS=15
-EXTERNAL_QUERY_ENABLED=true
-QUERY_REFINEMENT_ENABLED=true
-# Default enhanced retrieval settings work well
-RETRIEVAL_RELEVANCE_THRESHOLD=0.25
-RETRIEVAL_MAX_RESULTS=3
-```
-
-#### Minimal Setup (Less Context, Faster)
-```bash
-GRAPHITI_MAX_NODES=1
-GRAPHITI_MAX_FACTS=3
-EXTERNAL_QUERY_ENABLED=false
-RETRIEVAL_RELEVANCE_THRESHOLD=0.2
-RETRIEVAL_MAX_RESULTS=2
-QUERY_REFINEMENT_ENABLED=false
-```
-
-#### Balanced Setup (Recommended)
-```bash
-GRAPHITI_MAX_NODES=2
 GRAPHITI_MAX_FACTS=10
-EXTERNAL_QUERY_ENABLED=true
-QUERY_REFINEMENT_ENABLED=true
-QUERY_REFINEMENT_TEMPERATURE=0.3
-```
-
-#### Custom Weighting for Recent Messages
-```bash
-GRAPHITI_WEIGHT_LAST_MESSAGE=0.8
-GRAPHITI_WEIGHT_PREVIOUS_ASSISTANT_MESSAGE=0.15
-GRAPHITI_WEIGHT_PRIOR_USER_MESSAGE=0.05
-```
-
-#### BigQuery GDELT Configuration
-```bash
-# Enable/disable BigQuery integration
-BIGQUERY_ENABLED=true
-
-# Default GDELT query type (1, 2, or 3)
-BIGQUERY_DEFAULT_EXAMPLE=3
-
-# Maximum context length for BigQuery results
-BIGQUERY_MAX_CONTEXT_LENGTH=8000
 ```
 
 ## Building the image locally
@@ -191,45 +185,247 @@ docker compose up -d
 
 ## API Endpoints
 
-- `POST /webhook/letta`: Receives webhooks from Letta, retrieves context from Graphiti, and returns it.
+### Webhook Endpoints
+- `POST /webhook` - Primary webhook endpoint
+- `POST /webhook/letta` - Letta-specific webhook endpoint (same functionality)
+
+### Health & Monitoring
+- `GET /health` - Health check with service status and timestamp
+- `GET /agent-tracker/status` - View tracked agents and count
+- `POST /agent-tracker/reset` - Reset agent tracking (for testing)
 
 ## Troubleshooting
 
-If you encounter connection issues with Graphiti:
+### Common Issues
 
-1. Ensure the Graphiti API is running and accessible from the container
-2. Check network settings in the Docker Compose file
-3. Verify the GRAPHITI_URL environment variable is correctly set
-4. Run the service standalone for testing: `python flask_webhook_receiver.py`
+**Connection Issues with Graphiti:**
+1. Ensure Graphiti API is running and accessible
+2. Check network settings in Docker Compose file
+3. Verify `GRAPHITI_URL` environment variable
+4. Test with: `curl http://192.168.50.90:8003/health`
 
-### BigQuery Authentication
+**Memory Block Issues:**
+1. Check Letta API is accessible
+2. Verify `LETTA_PASSWORD` is correct
+3. Check logs for `[attach_block_to_agent]` errors
+4. Ensure agent_id format is correct (`agent-xxx`)
 
-For BigQuery GDELT integration to work, you need Google Cloud authentication:
+**Tool Attachment Failures:**
+1. Non-blocking - webhook will continue
+2. Check port 8020 tool service is running
+3. Review `[AUTO_TOOL_ATTACHMENT]` logs
+4. Verify `min_score` threshold isn't too high
 
-**Option A: Application Default Credentials (Recommended)**
-```bash
-# Install Google Cloud SDK and authenticate
-gcloud auth application-default login
-```
-
-**Option B: Service Account Key File**
-```bash
-# Set environment variable pointing to your service account key
-export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/keyfile.json"
-```
-
-Note: GDELT is a public dataset, so you only need basic Google Cloud authentication. No special permissions required.
-
-### Testing BigQuery Integration
-
-```bash
-# Test BigQuery functionality directly
-python test_bigquery_integration.py direct
-
-# Demo the webhook integration (requires webhook server running)
-python demo_bigquery_webhook.py
-```
+### Log Prefixes for Debugging
+- `[WEBHOOK_DEBUG]` - Request/response details
+- `[GRAPHITI]` - Graphiti API operations
+- `[AGENT_TRACKER]` - Agent tracking/notifications
+- `[AUTO_TOOL_ATTACHMENT]` - Tool attachment operations
+- `[attach_block_to_agent]` - Memory block operations
+- `[_build_cumulative_context]` - Context building logic
 
 ## Docker Hub Repository
 
 The Docker image is available at: [oculair/letta-webhook-receiver](https://hub.docker.com/r/oculair/letta-webhook-receiver)
+
+---
+
+## 📚 Technical Deep Dive
+
+### Component Details
+
+#### 1. Webhook Receipt (webhook_server/app.py:233-297)
+**Entry Points**: `/webhook`, `/webhook/letta`
+
+**Processing Flow**:
+```python
+# Extract agent_id from response or request path
+if data.get("response"):
+    agent_id = data["response"].get("agent_id")
+elif "/agents/" in path:
+    # Parse from path: /v1/agents/agent-xxx/messages
+    path_parts = path.split("/")
+    agent_id = path_parts[path_parts.index("agents") + 1]
+
+# Handle list-format prompts
+if isinstance(prompt, list):
+    prompt_text = " ".join([item.get("text", "") for item in prompt if item.get("type") == "text"])
+```
+
+**Agent Tracking**:
+- Thread-safe tracking with `threading.Lock()`
+- Background Matrix notification (non-blocking)
+- 5-second timeout for notifications
+
+#### 2. Graphiti Context Generation (webhook_server/app.py:96-224)
+
+**Two-Phase Search**:
+```python
+# Phase 1: Node Search
+POST {GRAPHITI_URL}/search/nodes
+{
+  "query": "user prompt",
+  "max_nodes": 8,
+  "group_ids": []  # Empty = all groups
+}
+
+# Phase 2: Fact Search  
+POST {GRAPHITI_URL}/search
+{
+  "query": "user prompt",
+  "max_facts": 20,
+  "group_ids": []
+}
+```
+
+**Response Processing**:
+- Deduplicates facts by exact text match
+- Formats as: `Node: {name}\nSummary: {summary}\n\nFact: {fact}`
+- Prefixes with "Relevant Entities from Knowledge Graph:"
+- Falls back to error message on timeout/failure
+
+**Retry Configuration**:
+- Total retries: 3
+- Backoff factor: 1 (1s, 2s, 4s delays)
+- Retry on: 429, 500, 502, 503, 504 status codes
+- Timeout: 30 seconds per request
+
+#### 3. Memory Block Management (webhook_server/memory_manager.py)
+
+**Block Lifecycle**:
+```python
+def create_memory_block(block_data, agent_id):
+    # 1. Find existing block by label
+    block, is_attached = find_memory_block(agent_id, "graphiti_context")
+    
+    # 2. Auto-attach if exists but not attached
+    if block and not is_attached:
+        attach_block_to_agent(agent_id, block['id'])
+    
+    # 3. Update with cumulative context
+    if block:
+        return update_memory_block(block['id'], block_data, agent_id, block)
+    
+    # 4. Create new block + auto-attach
+    new_block = requests.post(f"{LETTA_BASE_URL}/v1/blocks", json=block_data)
+    attach_block_to_agent(agent_id, new_block['id'])
+    return new_block
+```
+
+**Cumulative Context Building** (webhook_server/context_utils.py):
+```python
+def _build_cumulative_context(existing, new):
+    timestamp = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
+    separator = f"\n\n--- CONTEXT ENTRY ({timestamp}) ---\n\n"
+    
+    # Deduplication check
+    if _is_content_similar_with_query_awareness(most_recent, new):
+        return existing  # Skip duplicate
+    
+    cumulative = existing + separator + new
+    
+    # Truncate if > 4800 chars
+    if len(cumulative) > 4800:
+        cumulative = _truncate_oldest_entries(cumulative, 4800)
+    
+    return cumulative
+```
+
+**Truncation Strategy**:
+1. Parse entries by timestamp separators
+2. Always preserve most recent entry
+3. Work backwards to fit older entries
+4. Add "--- OLDER ENTRIES TRUNCATED ---" marker
+5. If newest entry alone > limit, truncate it with "[CONTENT TRUNCATED]"
+
+**Deduplication**:
+- 90% character overlap threshold
+- Query-aware for ArXiv searches (different queries = different content)
+- Timestamp-aware for Graphiti (different timestamps = different searches)
+
+#### 4. Tool Auto-Attachment (tool_manager.py)
+
+**External API Call**:
+```python
+POST http://192.168.50.90:8020/api/v1/tools/attach
+{
+  "query": "user prompt",
+  "agent_id": "agent-xxx",
+  "keep_tools": ["*", "find_tools_id"],  # Preserve all + utility
+  "limit": 3,
+  "min_score": 70.0,
+  "request_heartbeat": false
+}
+```
+
+**Keep Tools Logic**:
+- `"*"` = wildcard to preserve all existing tools
+- Dynamically looks up `find_tools` utility ID
+- Combines: `["*", find_tools_id]`
+
+**Error Handling**:
+```python
+try:
+    tool_result = find_attach_tools(...)
+except Exception as e:
+    print(f"[AUTO_TOOL_ATTACHMENT] Error: {e}")
+    # Continue - don't fail webhook
+```
+
+**Response Parsing**:
+- `successful_attachments`: New tools added
+- `detached_tools`: Tools removed
+- `preserved_tools`: Tools kept (confirmed by API)
+
+### File Structure
+
+```
+webhook_server/
+  ├── app.py              - Main Flask app & webhook endpoint
+  ├── config.py           - Environment config & API URLs
+  ├── memory_manager.py   - Block create/update/attach logic
+  ├── context_utils.py    - Cumulative context & truncation
+  ├── block_finders.py    - Find existing blocks by label
+  └── integrations.py     - ArXiv/GDELT stubs (disabled)
+
+tool_manager.py           - Tool attachment API client
+letta_tool_utils.py       - Letta tool utility functions
+arxiv_integration.py      - ArXiv integration (not used)
+run_server.py             - Entry point with CLI args
+```
+
+### Database/State
+
+**No Persistent Storage**: All state managed via external APIs:
+- Agent memory: Letta API (memory blocks)
+- Knowledge graph: Graphiti API
+- Tool registry: Tool Attachment API (port 8020)
+- Agent tracking: In-memory set (lost on restart)
+
+### Security Considerations
+
+**Authentication**:
+- Letta API: `X-BARE-PASSWORD` header + `Bearer` token
+- User isolation: `user_id` header set to `agent_id`
+- No webhook authentication (internal service)
+
+**Resource Limits**:
+- Context max: 4800 chars (prevents Letta API errors)
+- Tool limit: 3 new tools per request
+- Graphiti limits: Configurable nodes/facts
+- Timeouts: 5s-30s depending on service
+
+### Monitoring Recommendations
+
+**Key Metrics**:
+1. Webhook response time (target: < 3s)
+2. Graphiti API success rate (target: > 95%)
+3. Memory block attachment failures
+4. Context truncation frequency
+5. Agent growth rate
+
+**Alert Thresholds**:
+- Response time > 5s
+- Graphiti timeout rate > 10%
+- Memory block errors > 5%
+- Context truncation > 80% of requests
