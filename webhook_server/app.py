@@ -89,7 +89,7 @@ def reset_agent_tracker():
         })
 
 # Graphiti configuration
-GRAPHITI_API_URL = os.environ.get("GRAPHITI_URL", "http://192.168.50.90:8001")
+GRAPHITI_API_URL = os.environ.get("GRAPHITI_URL", "http://192.168.50.90:8003")
 DEFAULT_MAX_NODES = int(os.environ.get("GRAPHITI_MAX_NODES", "8"))
 DEFAULT_MAX_FACTS = int(os.environ.get("GRAPHITI_MAX_FACTS", "20"))
 
@@ -250,8 +250,21 @@ def webhook_receiver():
 
         if event_type == "message_sent":
             prompt = data.get("prompt")
+            # Try to get agent_id from response first
             if data.get("response"):
                 agent_id = data["response"].get("agent_id")
+            # If not found, try to extract from request path
+            if not agent_id and data.get("request") and data["request"].get("path"):
+                path = data["request"]["path"]
+                if "/agents/" in path:
+                    # Extract agent_id from path like /v1/agents/agent-xxx/messages
+                    path_parts = path.split("/")
+                    if "agents" in path_parts:
+                        agent_idx = path_parts.index("agents") + 1
+                        if agent_idx < len(path_parts):
+                            potential_agent_id = path_parts[agent_idx]
+                            if potential_agent_id.startswith("agent-"):
+                                agent_id = potential_agent_id
         elif event_type == "stream_started":
             prompt = data.get("prompt")
             if data.get("request") and data["request"].get("path"):

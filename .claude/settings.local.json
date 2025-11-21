@@ -14,7 +14,12 @@
       "Bash(curl:*)",
       "Bash(grep:*)",
       "Bash(./venvsource/Scripts/python.exe test_arxiv_fix.py)",
-      "Bash(./venvsource/Scripts/python.exe test_arxiv_simple.py)"
+      "Bash(./venvsource/Scripts/python.exe test_arxiv_simple.py)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(echo:*)",
+      "Bash(env)",
+      "Bash(unset GRAPHITI_URL)"
     ],
     "deny": []
   }
