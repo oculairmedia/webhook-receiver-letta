@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new && find . -path ./archive -prune -o -name \"test_*.py\" -type f -print | wc -l)",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new && ls -la | grep -E \"test|spec\")",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new && grep -r \"pytest\" requirements*.txt setup.py 2>/dev/null || echo \"No pytest in requirements\")",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new && wc -l webhook_server/*.py | tail -1)",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new && find webhook_server -name \"*.py\" -type f | xargs wc -l | tail -1)",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new && ls -lh archive/tests/*.py | wc -l)",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new && ls -lh archive/old_tests/*.py | wc -l)",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new && git status:*)",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new && git branch:*)",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new && git log:*)",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new && git add:*)",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new && git diff:*)",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new && git commit:*)",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new && git push:*)",
+      "Edit(/**)",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new && git fetch:*)",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new && python3 -m pytest --collect-only -q 2>&1 | tail -10)",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new && mkdir -p agent_registry_service)",
+      "Bash(curl -s http://192.168.50.90:8080/v1/meta 2>&1 | head -20)",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new/agent_registry_service && docker-compose up -d)",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new/agent_registry_service && pip3 install -q flask weaviate-client sentence-transformers 2>&1 | grep -v \"already satisfied\" | head -20)",
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new/agent_registry_service && docker build -t agent-registry:latest . 2>&1 | tail -30)"
+    ]
+  }
+}
