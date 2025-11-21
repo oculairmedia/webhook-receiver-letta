@@ -9,7 +9,8 @@ A production-ready Flask-based webhook receiver that integrates with Letta agent
 - **💾 Memory Management**: Automatic cumulative context building with smart truncation (4800 char limit)
 - **🔧 Tool Auto-Attachment**: Dynamic tool discovery and attachment based on agent prompts
 - **👥 Agent Tracking**: New agent detection with Matrix client notifications
-- **🤝 Agent Discovery & Registry**: Semantic search for relevant agents and auto-registration (NEW!)
+- **🤝 Agent Discovery & Registry**: Semantic search for relevant agents with auto-sync (NEW!)
+- **🔌 MCP Server**: FastMCP HTTP server exposing `find_agents` tool for agent collaboration (NEW!)
 
 **Note**: ArXiv and GDELT integrations are currently disabled but remain in codebase for future reactivation.
 
@@ -92,6 +93,9 @@ The webhook service processes incoming Letta agent requests through a multi-stag
 | Letta API | 8283 | Memory blocks & agents | Default |
 | Tool Attachment | 8020 | Tool discovery & attachment | 15s |
 | Matrix Client | 8004 | New agent notifications | 5s |
+| Agent Registry | 8021 | Semantic agent search | 15s |
+| Agent Registry MCP | 8022 | MCP server with find_agents tool | N/A |
+| Weaviate | 8092 | Vector database for agent registry | 30s |
 
 ### Key Implementation Details
 
@@ -155,13 +159,20 @@ The following environment variables can be configured:
 - `LETTA_BASE_URL`: Base URL for the Letta API (default: https://letta2.oculair.ca)
 - `LETTA_PASSWORD`: Password for Letta API authentication (default: lettaSecurePass123)
 - `MATRIX_CLIENT_URL`: Matrix client for agent notifications (default: http://192.168.50.90:8004)
-- `AGENT_REGISTRY_URL`: URL of the agent registry service (default: http://192.168.50.90:8020)
+- `AGENT_REGISTRY_URL`: URL of the agent registry service (default: http://192.168.50.90:8021)
 
 #### Context Retrieval Configuration
 - `GRAPHITI_MAX_NODES`: Maximum nodes to retrieve from knowledge graph (default: 8)
 - `GRAPHITI_MAX_FACTS`: Maximum facts to retrieve from knowledge graph (default: 20)
-- `AGENT_REGISTRY_MAX_AGENTS`: Maximum agents to show in discovery (default: 5)
-- `AGENT_REGISTRY_MIN_SCORE`: Minimum relevance score 0-1 for agents (default: 0.5)
+- `AGENT_REGISTRY_MAX_AGENTS`: Maximum agents to show in discovery (default: 10)
+- `AGENT_REGISTRY_MIN_SCORE`: Minimum relevance score 0-1 for agents (default: 0.3)
+
+#### Agent Registry Configuration
+- `WEAVIATE_URL`: Weaviate vector database URL (default: http://weaviate:8080)
+- `OLLAMA_BASE_URL`: Ollama API for embeddings (default: http://192.168.50.80:11434)
+- `OLLAMA_EMBEDDING_MODEL`: Embedding model (default: dengcao/Qwen3-Embedding-4B:Q4_K_M)
+- `EMBEDDING_DIMENSION`: Embedding dimensions (default: 2560)
+- `AGENT_SYNC_INTERVAL`: Auto-sync interval in seconds (default: 300)
 
 ### Configuration Examples
 
@@ -209,6 +220,169 @@ docker compose up -d
 - `GET /agent-tracker/status` - View tracked agents and count
 - `POST /agent-tracker/reset` - Reset agent tracking (for testing)
 
+## 🤖 Agent Registry MCP Server
+
+The Agent Registry MCP Server provides a Model Context Protocol (MCP) interface for agent discovery and collaboration. It exposes the `find_agents` tool that allows agents to search for other agents based on natural language queries.
+
+### Architecture
+
+```
+┌──────────────────────────────────────────────┐
+│   Agent Registry Services                    │
+├──────────────────────────────────────────────┤
+│                                              │
+│  ┌────────────────┐    ┌─────────────────┐  │
+│  │ Agent Registry │    │ FastMCP Server  │  │
+│  │ API (8021)     │    │ (8022/mcp)      │  │
+│  │                │    │                 │  │
+│  │ - Search       │    │ - find_agents   │  │
+│  │ - Register     │    │ - HTTP/MCP      │  │
+│  └────────┬───────┘    └─────────────────┘  │
+│           │                                  │
+│           ▼                                  │
+│  ┌────────────────────┐                     │
+│  │ Weaviate (8092)    │                     │
+│  │ - Vector storage   │                     │
+│  │ - Semantic search  │                     │
+│  └────────┬───────────┘                     │
+│           │                                  │
+│           ▼                                  │
+│  ┌────────────────────┐                     │
+│  │ Sync Service       │                     │
+│  │ - Fetch from Letta │                     │
+│  │ - Every 5 minutes  │                     │
+│  └────────────────────┘                     │
+└──────────────────────────────────────────────┘
+```
+
+### MCP Server Details
+
+**Endpoint**: `http://192.168.50.90:8022/mcp`  
+**Transport**: HTTP (Streamable HTTP protocol)  
+**Framework**: FastMCP 2.13+
+
+#### Available Tools
+
+##### `find_agents`
+Search for relevant agents in the agent registry based on natural language queries.
+
+**Parameters:**
+- `query` (string, required): Search query describing what kind of agent you're looking for
+  - Examples: "machine learning expert", "database administrator", "content writer"
+- `limit` (integer, optional): Maximum number of agents to return (default: 10, max: 50)
+- `min_score` (float, optional): Minimum relevance score 0.0-1.0 (default: 0.3)
+
+**Returns:**
+Formatted string with:
+- Agent IDs
+- Names and descriptions
+- Capabilities
+- Relevance scores
+- Status (active/inactive)
+- Tip to use `matrix_agent_message` tool for messaging
+
+**Example Usage:**
+```python
+# From an agent with MCP access
+result = find_agents(
+    query="python developer with API experience",
+    limit=5,
+    min_score=0.4
+)
+```
+
+**Example Output:**
+```
+Found 3 relevant agents:
+
+1. **Python API Expert** (ID: `agent-abc123`)
+   Status: active
+   Relevance: 0.87
+   Description: Specialized in building RESTful APIs with Python and FastAPI...
+   Capabilities: api-development, python, fastapi
+
+2. **Backend Developer** (ID: `agent-def456`)
+   Status: active
+   Relevance: 0.72
+   Description: Full-stack developer focusing on backend services...
+   Capabilities: python, flask, databases
+
+💡 Tip: You can message these agents using the matrix_agent_message tool with their agent ID.
+```
+
+#### Available Resources
+
+##### `agent-registry://stats`
+Get statistics about the agent registry including total agents, embeddings, and sync status.
+
+### Registration with Claude Code
+
+To register the MCP server with Claude Code:
+
+```bash
+claude mcp add --transport http agent-registry http://192.168.50.90:8022/mcp -s user
+```
+
+This makes the `find_agents` tool available to all your Claude Code sessions.
+
+### Agent Registry Services
+
+#### 1. Agent Registry API (Port 8021)
+
+RESTful API for agent management and search.
+
+**Endpoints:**
+- `GET /health` - Health check
+- `GET /api/v1/agents/search` - Search agents
+  - Query params: `query`, `limit`, `min_score`
+- `POST /api/v1/agents` - Register new agent
+- `GET /api/v1/stats` - Get registry statistics
+
+#### 2. Auto-Sync Service
+
+Background service that automatically syncs agents from Letta API to the registry.
+
+**Configuration:**
+- Sync interval: 300 seconds (5 minutes) - configurable via `AGENT_SYNC_INTERVAL`
+- Fetches all agents from Letta API
+- Generates embeddings using Ollama Qwen3-Embedding-4B:Q4_K_M
+- Updates Weaviate vector database
+
+**Current Status:**
+- Successfully synced 50+ agents from production Letta instance
+- Embedding dimensions: 2560
+- Ollama endpoint: `http://192.168.50.80:11434`
+
+#### 3. Weaviate Vector Database (Port 8092)
+
+Stores agent embeddings for semantic search.
+
+**Access:**
+- HTTP: `http://192.168.50.90:8092`
+- gRPC: `192.168.50.90:50052`
+
+### Webhook Integration
+
+The webhook receiver automatically queries the agent registry on each webhook and creates an `available_agents` memory block with the top 10 most relevant agents.
+
+**Configuration:**
+```bash
+AGENT_REGISTRY_URL=http://192.168.50.90:8021
+AGENT_REGISTRY_MAX_AGENTS=10
+AGENT_REGISTRY_MIN_SCORE=0.3
+```
+
+### Container Health Status
+
+All agent registry services are monitored for health:
+
+| Service | Port | Health Status |
+|---------|------|---------------|
+| agent-registry-weaviate | 8092 | ✅ Monitored |
+| agent-registry-service | 8021 | ✅ Monitored |
+| agent-registry-sync | - | Background worker |
+| agent-registry-mcp | 8022 | MCP server |
+
 ## Troubleshooting
 
 ### Common Issues
@@ -230,6 +404,20 @@ docker compose up -d
 2. Check port 8020 tool service is running
 3. Review `[AUTO_TOOL_ATTACHMENT]` logs
 4. Verify `min_score` threshold isn't too high
+
+**Agent Registry Issues:**
+1. Check Weaviate is healthy: `docker ps | grep weaviate`
+2. Verify agent registry service: `curl http://192.168.50.90:8021/health`
+3. Test MCP endpoint: `curl http://192.168.50.90:8022/mcp`
+4. Check sync service logs: `docker logs agent-registry-sync`
+5. Verify Ollama is accessible: `curl http://192.168.50.80:11434/api/tags`
+
+**MCP Server Not Accessible:**
+1. Ensure FastMCP CLI is installed in container
+2. Check port mapping: 8022 (host) → 8000 (container)
+3. Review MCP server logs: `docker logs agent-registry-mcp`
+4. Verify HTTP transport is enabled (not SSE)
+5. Test with: `curl -H "Accept: text/event-stream" http://192.168.50.90:8022/mcp`
 
 ### Log Prefixes for Debugging
 - `[WEBHOOK_DEBUG]` - Request/response details
