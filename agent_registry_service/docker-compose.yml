@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  weaviate:
+    image: semitechnologies/weaviate:1.27.5
+    container_name: agent-registry-weaviate
+    ports:
+      - "8080:8080"
+      - "50051:50051"
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+      DEFAULT_VECTORIZER_MODULE: 'none'
+      CLUSTER_HOSTNAME: 'node1'
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+    restart: unless-stopped
+    networks:
+      - agent-registry-network
+
+  agent-registry:
+    build: .
+    container_name: agent-registry-service
+    ports:
+      - "8020:8020"
+    environment:
+      WEAVIATE_URL: "http://weaviate:8080"
+      EMBEDDING_MODEL: "all-MiniLM-L6-v2"
+      PORT: 8020
+    depends_on:
+      - weaviate
+    restart: unless-stopped
+    networks:
+      - agent-registry-network
+    volumes:
+      - model_cache:/root/.cache/huggingface
+
+volumes:
+  weaviate_data:
+  model_cache:
+
+networks:
+  agent-registry-network:
+    driver: bridge

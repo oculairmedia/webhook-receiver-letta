@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  agent-registry:
+    build: .
+    container_name: agent-registry-service
+    ports:
+      - "8020:8020"
+    environment:
+      WEAVIATE_URL: "http://192.168.50.90:8080"
+      EMBEDDING_MODEL: "all-MiniLM-L6-v2"
+      PORT: 8020
+    restart: unless-stopped
+    network_mode: "host"
+    volumes:
+      - model_cache:/root/.cache/huggingface
+
+volumes:
+  model_cache:
