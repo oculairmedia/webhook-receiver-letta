@@ -108,7 +108,8 @@ DEFAULT_MAX_FACTS = int(os.environ.get("GRAPHITI_MAX_FACTS", "20"))
 
 def query_graphiti_api(query: str, max_nodes: int = None, max_facts: int = None) -> dict:
     """
-    Query the Graphiti API for context with robust timeout and retry handling.
+    Query the Graphiti unified search API for context with robust timeout and retry handling.
+    Uses the new /search endpoint with proper config structure.
     """
     if max_nodes is None:
         max_nodes = DEFAULT_MAX_NODES
@@ -120,7 +121,7 @@ def query_graphiti_api(query: str, max_nodes: int = None, max_facts: int = None)
         graphiti_url = GRAPHITI_API_URL
         if not graphiti_url:
             print(f"[GRAPHITI] Warning: Empty graphiti_url provided, using default")
-            graphiti_url = "http://192.168.50.90:8001"
+            graphiti_url = "http://192.168.50.90:3004"
         
         # Configure session with retry logic
         session = requests.Session()
@@ -133,69 +134,74 @@ def query_graphiti_api(query: str, max_nodes: int = None, max_facts: int = None)
         session.mount("http://", adapter)
         session.mount("https://", adapter)
         
-        # Use the improved Graphiti API approach with proper parameters
-        search_url_nodes = f"{graphiti_url}/search/nodes"
-        search_url_facts = f"{graphiti_url}/search"
+        # Use the unified search endpoint with proper config
+        search_url = f"{graphiti_url}/search"
         
-        print(f"[GRAPHITI] Searching nodes at {search_url_nodes}")
+        print(f"[GRAPHITI] Searching at {search_url} with query: '{query[:100]}...'")
         
-        # Improved nodes search payload
-        nodes_payload = {
+        # Unified search payload with both node and edge config
+        search_payload = {
             "query": query,
-            "max_nodes": max_nodes,
-            "group_ids": []  # Empty list means search all groups
+            "config": {
+                "edge_config": {
+                    "search_methods": ["fulltext", "similarity"],
+                    "reranker": "rrf",
+                    "bfs_max_depth": 2,
+                    "sim_min_score": 0.1,
+                    "mmr_lambda": 0.5
+                },
+                "node_config": {
+                    "search_methods": ["fulltext", "similarity"],
+                    "reranker": "rrf",
+                    "bfs_max_depth": 2,
+                    "sim_min_score": 0.1,
+                    "mmr_lambda": 0.5,
+                    "centrality_boost_factor": 1.0
+                },
+                "limit": max_nodes,
+                "reranker_min_score": 0.0
+            },
+            "filters": {}
         }
         
-        # Search for nodes
-        nodes_response = session.post(search_url_nodes, json=nodes_payload, timeout=30)
-        nodes_response.raise_for_status()
-        nodes_results = nodes_response.json()
+        # Single unified search call
+        print(f"[GRAPHITI] Sending payload: {search_payload}")
+        search_response = session.post(search_url, json=search_payload, timeout=30)
+        print(f"[GRAPHITI] Response status: {search_response.status_code}")
+        search_response.raise_for_status()
+        search_results = search_response.json()
+        print(f"[GRAPHITI] Response keys: {list(search_results.keys())}")
         
-        print(f"[GRAPHITI] Nodes results: {len(nodes_results.get('nodes', []))} nodes found")
+        nodes = search_results.get("nodes", [])
+        edges = search_results.get("edges", [])
         
-        # Search for facts with proper parameter name
-        facts_payload = {
-            "query": query,
-            "max_facts": max_facts,
-            "group_ids": []  # Empty list means search all groups
-        }
-        
-        facts_response = session.post(search_url_facts, json=facts_payload, timeout=30)
-        facts_response.raise_for_status()
-        facts_results = facts_response.json()
-        
-        print(f"[GRAPHITI] Facts results: {len(facts_results.get('facts', []))} facts found")
-        
-        # Combine results into expected format
-        search_results = {
-            "nodes": nodes_results.get("nodes", []) if isinstance(nodes_results, dict) else nodes_results,
-            "facts": facts_results.get("facts", []) if isinstance(facts_results, dict) else facts_results
-        }
+        print(f"[GRAPHITI] Results: {len(nodes)} nodes, {len(edges)} edges")
         
         context_parts = []
         
-        if "nodes" in search_results and search_results["nodes"]:
-            print(f"[GRAPHITI] Processing {len(search_results['nodes'])} nodes")
-            for node in search_results["nodes"]:
-                context_parts.append(f"Node: {node.get('name', 'N/A')}\nSummary: {node.get('summary', 'N/A')}")
+        # Process nodes
+        if nodes:
+            print(f"[GRAPHITI] Processing {len(nodes)} nodes")
+            for node in nodes[:max_nodes]:  # Limit to max_nodes
+                node_name = node.get('name', 'N/A')
+                node_summary = node.get('summary', 'N/A')
+                context_parts.append(f"Node: {node_name}\nSummary: {node_summary}")
         
-        if "facts" in search_results and search_results["facts"]:
-            print(f"[GRAPHITI] Processing {len(search_results['facts'])} facts")
+        # Process edges as facts
+        if edges:
+            print(f"[GRAPHITI] Processing {len(edges)} edges")
             # Deduplicate facts by text content
             seen_facts = set()
-            unique_facts = []
-            for fact in search_results["facts"]:
-                fact_text = fact.get('fact', 'N/A')
+            for edge in edges[:max_facts]:  # Limit to max_facts
+                fact_text = edge.get('fact', edge.get('name', 'N/A'))
                 if fact_text not in seen_facts and fact_text != 'N/A':
                     seen_facts.add(fact_text)
-                    unique_facts.append(fact_text)
+                    context_parts.append(f"Fact: {fact_text}")
             
-            print(f"[GRAPHITI] After deduplication: {len(unique_facts)} unique facts")
-            for fact_text in unique_facts:
-                context_parts.append(f"Fact: {fact_text}")
+            print(f"[GRAPHITI] After deduplication: {len(seen_facts)} unique facts")
         
         if not context_parts:
-            fallback_msg = f"No relevant information found in Graphiti for query: '{query}' (searched {max_nodes} nodes, {max_facts} facts)"
+            fallback_msg = f"No relevant information found in Graphiti for query: '{query}' (limit: {max_nodes})"
             print(f"[GRAPHITI] No context found: {fallback_msg}")
             return {"context": fallback_msg, "success": False}
         
