@@ -226,8 +226,18 @@ def generate_context_from_prompt(prompt: str, agent_id: str) -> dict:
     """
     Generates context from a prompt, handling Graphiti, arXiv and GDELT searches.
     """
-    # Start with Graphiti search
-    graphiti_result = query_graphiti_api(prompt)
+    # Extract key terms from prompt for better Graphiti search
+    # Use single most important word to maximize recall (Graphiti search works best with simple queries)
+    stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should', 'could', 'can', 'may', 'might', 'must', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'this', 'that', 'these', 'those', 'what', 'which', 'who', 'when', 'where', 'why', 'how', 'help', 'tell', 'me', 'about', 'know', 'get', 'make', 'see', 'look', 'find', 'show', 'give', 'need', 'want', 'think'}
+    words = prompt.lower().split()
+    key_words = [w for w in words if w not in stop_words and len(w) > 3][:2]  # Take top 2 words
+    search_query = ' '.join(key_words) if key_words else prompt[:30]
+    
+    print(f"[CONTEXT_GEN] Original prompt: '{prompt[:100]}...'")
+    print(f"[CONTEXT_GEN] Extracted search query: '{search_query}'")
+    
+    # Start with Graphiti search using extracted keywords
+    graphiti_result = query_graphiti_api(search_query)
     
     # Check for arXiv trigger
     should_arxiv, arxiv_query = arxiv_integration.should_trigger_arxiv_search(prompt)
