@@ -208,7 +208,8 @@ def query_agent_registry(query: str, limit: int = None, min_score: float = None)
 
 def format_agent_context(agent_results: Dict) -> str:
     """
-    Format agent search results into a readable context string for memory block.
+    Format agent search results into a minimal context string for memory block.
+    Only includes agent name and ID to minimize token usage.
     
     Args:
         agent_results: Results from query_agent_registry()
@@ -230,25 +231,12 @@ def format_agent_context(agent_results: Dict) -> str:
     for agent in agents:
         agent_id = agent.get("agent_id", "unknown")
         name = agent.get("name", "Unknown Agent")
-        description = agent.get("description", "No description available")
-        capabilities = agent.get("capabilities", [])
-        status = agent.get("status", "unknown")
         score = agent.get("score", 0.0)
         
-        # Format agent entry
-        agent_entry = f"""
-Agent: {name}
-ID: {agent_id}
-Status: {status}
-Relevance: {score:.2f}
-Description: {description[:200]}{'...' if len(description) > 200 else ''}
-"""
-        
-        if capabilities:
-            agent_entry += f"Capabilities: {', '.join(capabilities[:3])}\n"
-        
+        # Minimal format: just name, ID, and relevance
+        agent_entry = f"- {name} ({agent_id}) [relevance: {score:.2f}]"
         context_parts.append(agent_entry)
     
-    context_parts.append(f"\nYou can message these agents using the matrix_agent_message tool with their agent ID.")
+    context_parts.append("\nUse matrix_agent_message tool with agent ID to contact them.")
     
     return "\n".join(context_parts)

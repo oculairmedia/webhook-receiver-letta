@@ -328,12 +328,18 @@ def webhook_receiver():
             if agent_results.get("success") and agent_results.get("agents"):
                 # Create memory block with available agents
                 agent_context = format_agent_context(agent_results)
+                print(f"[AGENT_DISCOVERY] Formatted agent context ({len(agent_context)} chars)")
                 agent_block_data = {
                     "label": "available_agents",
                     "value": agent_context,
                     "metadata": {"source": "agent_registry", "event_type": event_type}
                 }
-                create_memory_block(agent_block_data, agent_id)
+                print(f"[AGENT_DISCOVERY] Creating available_agents memory block for agent {agent_id}")
+                try:
+                    block_result = create_memory_block(agent_block_data, agent_id)
+                    print(f"[AGENT_DISCOVERY] Block creation result: {block_result.get('id') if block_result else 'None'}")
+                except Exception as block_err:
+                    print(f"[AGENT_DISCOVERY] Error creating block: {block_err}")
                 print(f"[AGENT_DISCOVERY] Found {len(agent_results['agents'])} relevant agents")
             else:
                 print(f"[AGENT_DISCOVERY] No relevant agents found or query failed")

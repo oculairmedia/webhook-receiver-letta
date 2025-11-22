@@ -46,7 +46,14 @@ def attach_block_to_agent(agent_id: str, block_id: str) -> bool:
         headers = LETTA_API_HEADERS.copy()
         headers["user_id"] = agent_id
         
-        attach_response = requests.patch(attach_url, headers=headers)
+        # Send empty JSON body to avoid proxy error
+        attach_response = requests.patch(attach_url, headers=headers, json={})
+        
+        # Handle 409 Conflict (block already attached) as success
+        if attach_response.status_code == 409:
+            print(f"[attach_block_to_agent] Block {block_id} already attached to agent {agent_id}")
+            return True
+        
         attach_response.raise_for_status()
         
         print(f"[attach_block_to_agent] Successfully attached block {block_id} to agent {agent_id}")
