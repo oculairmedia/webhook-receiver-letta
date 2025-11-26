@@ -245,7 +245,7 @@ class TestLettaAgentOperations:
     @responses.activate
     def test_create_and_attach_block_workflow(self):
         """Test the complete workflow of creating and attaching a block."""
-        # Step 1: Check for existing block (none found)
+        # Step 1: Check for existing block (none found) - via find_memory_block in block_finders
         responses.add(
             responses.GET,
             "http://test-letta.example.com/v1/agents/agent-123/core-memory/blocks",
@@ -279,12 +279,12 @@ class TestLettaAgentOperations:
             status=200
         )
 
-        with patch('webhook_server.memory_manager.get_api_url', side_effect=[
-            "http://test-letta.example.com/v1/agents/agent-123/core-memory/blocks",
-            "http://test-letta.example.com/v1/blocks",
-            "http://test-letta.example.com/v1/blocks",
-            "http://test-letta.example.com/v1/agents/agent-123/core-memory/blocks/attach/block-new-555"
-        ]):
+        # Mock both block_finders and memory_manager get_api_url functions
+        def mock_get_api_url(path):
+            return f"http://test-letta.example.com/v1/{path.lstrip('/')}"
+
+        with patch('webhook_server.block_finders.get_api_url', side_effect=mock_get_api_url), \
+             patch('webhook_server.memory_manager.get_api_url', side_effect=mock_get_api_url):
             result = create_memory_block(
                 {"label": "cumulative_context", "value": "New context"},
                 agent_id="agent-123"
@@ -292,4 +292,4 @@ class TestLettaAgentOperations:
 
         assert result['id'] == "block-new-555"
         # Should have called attach endpoint
-        assert any('attach' in call.request.url for call in responses.calls)
+        assert any('attach' in (call.request.url or '') for call in responses.calls)

@@ -1,8 +1,12 @@
 """
 Contract tests for Graphiti API.
 
-These tests verify that the Graphiti API responses match expected schemas.
+These tests verify that the Graphiti unified search API responses match expected schemas.
 Contract tests help detect breaking changes in external APIs.
+
+The current implementation uses a unified /search endpoint with:
+- Request: { query, config: { limit, edge_config, node_config }, filters }
+- Response: { nodes: [...], edges: [...] }
 """
 
 import pytest
@@ -11,12 +15,12 @@ import responses
 
 
 @pytest.mark.contract
-class TestGraphitiNodeSearchContract:
-    """Contract tests for Graphiti node search endpoint."""
+class TestGraphitiUnifiedSearchContract:
+    """Contract tests for Graphiti unified search endpoint."""
 
     @responses.activate
-    def test_node_search_response_schema(self):
-        """Test that node search response matches expected schema."""
+    def test_unified_search_response_schema(self):
+        """Test that unified search response matches expected schema."""
         expected_response = {
             "nodes": [
                 {
@@ -25,21 +29,22 @@ class TestGraphitiNodeSearchContract:
                     "summary": "Node summary",
                     "created_at": "2024-01-15T10:00:00Z"
                 }
+            ],
+            "edges": [
+                {
+                    "id": "edge-456",
+                    "fact": "Test fact text",
+                    "source": "node-123",
+                    "target": "node-456",
+                    "created_at": "2024-01-15T11:00:00Z"
+                }
             ]
         }
 
         responses.add(
             responses.POST,
-            "http://test-graphiti.example.com:8003/search/nodes",
-            json=expected_response,
-            status=200
-        )
-
-        # Mock empty facts response
-        responses.add(
-            responses.POST,
             "http://test-graphiti.example.com:8003/search",
-            json={"facts": []},
+            json=expected_response,
             status=200
         )
 
@@ -48,28 +53,28 @@ class TestGraphitiNodeSearchContract:
         with patch('webhook_server.app.GRAPHITI_API_URL', 'http://test-graphiti.example.com:8003'):
             result = query_graphiti_api("test")
 
-        # Verify schema compliance
+        # Verify response schema compliance
         assert 'nodes' in expected_response
+        assert 'edges' in expected_response
         assert isinstance(expected_response['nodes'], list)
+        assert isinstance(expected_response['edges'], list)
 
         if expected_response['nodes']:
             node = expected_response['nodes'][0]
             assert 'id' in node or 'name' in node
             assert 'summary' in node
 
+        if expected_response['edges']:
+            edge = expected_response['edges'][0]
+            assert 'fact' in edge or 'name' in edge
+
     @responses.activate
-    def test_node_search_request_schema(self):
-        """Test that node search request has correct schema."""
-        responses.add(
-            responses.POST,
-            "http://test-graphiti.example.com:8003/search/nodes",
-            json={"nodes": []},
-            status=200
-        )
+    def test_unified_search_request_schema(self):
+        """Test that unified search request has correct schema."""
         responses.add(
             responses.POST,
             "http://test-graphiti.example.com:8003/search",
-            json={"facts": []},
+            json={"nodes": [], "edges": []},
             status=200
         )
 
@@ -83,58 +88,67 @@ class TestGraphitiNodeSearchContract:
         import json
         payload = json.loads(request_body)
 
-        # Expected schema
+        # Expected unified search schema
         assert 'query' in payload
         assert isinstance(payload['query'], str)
-        assert 'max_nodes' in payload
-        assert isinstance(payload['max_nodes'], int)
+        assert 'config' in payload
+        assert isinstance(payload['config'], dict)
+        assert 'limit' in payload['config']
+        assert payload['config']['limit'] == 5
+        assert 'edge_config' in payload['config']
+        assert 'node_config' in payload['config']
+        assert 'filters' in payload
 
 
 @pytest.mark.contract
-class TestGraphitiFactSearchContract:
-    """Contract tests for Graphiti fact search endpoint."""
+class TestGraphitiSearchConfigContract:
+    """Contract tests for Graphiti search configuration."""
 
     @responses.activate
-    def test_fact_search_response_schema(self):
-        """Test that fact search response matches expected schema."""
-        expected_response = {
-            "facts": [
-                {
-                    "id": "fact-456",
-                    "fact": "Test fact text",
-                    "source": "node-123",
-                    "target": "node-456",
-                    "created_at": "2024-01-15T11:00:00Z"
-                }
-            ]
-        }
-
-        responses.add(
-            responses.POST,
-            "http://test-graphiti.example.com:8003/search/nodes",
-            json={"nodes": []},
-            status=200
-        )
+    def test_edge_config_schema(self):
+        """Test that edge_config has expected structure."""
         responses.add(
             responses.POST,
             "http://test-graphiti.example.com:8003/search",
-            json=expected_response,
+            json={"nodes": [], "edges": []},
             status=200
         )
 
         from webhook_server.app import query_graphiti_api
 
         with patch('webhook_server.app.GRAPHITI_API_URL', 'http://test-graphiti.example.com:8003'):
-            result = query_graphiti_api("test")
+            query_graphiti_api("test")
 
-        # Verify schema compliance
-        assert 'facts' in expected_response
-        assert isinstance(expected_response['facts'], list)
+        import json
+        payload = json.loads(responses.calls[0].request.body)
+        edge_config = payload['config']['edge_config']
 
-        if expected_response['facts']:
-            fact = expected_response['facts'][0]
-            assert 'fact' in fact
-            assert isinstance(fact['fact'], str)
+        assert 'search_methods' in edge_config
+        assert 'reranker' in edge_config
+        assert isinstance(edge_config['search_methods'], list)
+
+    @responses.activate
+    def test_node_config_schema(self):
+        """Test that node_config has expected structure."""
+        responses.add(
+            responses.POST,
+            "http://test-graphiti.example.com:8003/search",
+            json={"nodes": [], "edges": []},
+            status=200
+        )
+
+        from webhook_server.app import query_graphiti_api
+
+        with patch('webhook_server.app.GRAPHITI_API_URL', 'http://test-graphiti.example.com:8003'):
+            query_graphiti_api("test")
+
+        import json
+        payload = json.loads(responses.calls[0].request.body)
+        node_config = payload['config']['node_config']
+
+        assert 'search_methods' in node_config
+        assert 'reranker' in node_config
+        assert isinstance(node_config['search_methods'], list)
 
 
 @pytest.mark.contract
@@ -143,7 +157,7 @@ class TestGraphitiErrorContract:
 
     @responses.activate
     def test_error_response_schema(self):
-        """Test that error responses have expected structure."""
+        """Test that error responses are handled gracefully."""
         error_response = {
             "error": "Internal server error",
             "message": "Database connection failed",
@@ -152,7 +166,7 @@ class TestGraphitiErrorContract:
 
         responses.add(
             responses.POST,
-            "http://test-graphiti.example.com:8003/search/nodes",
+            "http://test-graphiti.example.com:8003/search",
             json=error_response,
             status=500
         )
@@ -181,21 +195,16 @@ class TestGraphitiBackwardCompatibility:
                     "summary": "Old format"
                     # Missing 'id' and 'created_at' fields
                 }
-            ]
+            ],
+            "edges": []
         }
 
         responses.add(
             responses.POST,
-            "http://test-graphiti.example.com:8003/search/nodes",
+            "http://test-graphiti.example.com:8003/search",
             json=legacy_response,
             status=200
         )
-        responses.add(
-            responses.POST,
-            "http://test-graphiti.example.com:8003/search",
-            json={"facts": []},
-            status=200
-        )
 
         from webhook_server.app import query_graphiti_api
 
@@ -204,25 +213,22 @@ class TestGraphitiBackwardCompatibility:
 
         # Should handle gracefully
         assert 'context' in result
+        assert result['success'] is True
 
     @responses.activate
-    def test_handles_list_vs_dict_response(self):
-        """Test handling both list and dict response formats."""
-        # Some APIs might return list directly, others wrap in dict
-        list_response = [
-            {"name": "Node 1", "summary": "Summary 1"}
-        ]
+    def test_handles_response_without_edges(self):
+        """Test handling response with only nodes (no edges key)."""
+        response = {
+            "nodes": [
+                {"name": "Node 1", "summary": "Summary 1"}
+            ]
+            # No 'edges' key at all
+        }
 
         responses.add(
             responses.POST,
-            "http://test-graphiti.example.com:8003/search/nodes",
-            json=list_response,
-            status=200
-        )
-        responses.add(
-            responses.POST,
             "http://test-graphiti.example.com:8003/search",
-            json=[],
+            json=response,
             status=200
         )
 
@@ -233,3 +239,23 @@ class TestGraphitiBackwardCompatibility:
 
         # Should handle gracefully
         assert 'context' in result
+        assert result['success'] is True
+
+    @responses.activate
+    def test_handles_empty_response(self):
+        """Test handling empty response."""
+        responses.add(
+            responses.POST,
+            "http://test-graphiti.example.com:8003/search",
+            json={"nodes": [], "edges": []},
+            status=200
+        )
+
+        from webhook_server.app import query_graphiti_api
+
+        with patch('webhook_server.app.GRAPHITI_API_URL', 'http://test-graphiti.example.com:8003'):
+            result = query_graphiti_api("test")
+
+        assert 'context' in result
+        assert result['success'] is False
+        assert "No relevant information found" in result['context']

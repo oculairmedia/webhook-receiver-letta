@@ -194,32 +194,26 @@ class TestQueryGraphitiAPI:
 
     @patch('webhook_server.app.requests.Session')
     def test_query_graphiti_success(self, mock_session_class):
-        """Test successful Graphiti API query."""
+        """Test successful Graphiti query with unified search endpoint."""
         from webhook_server.app import query_graphiti_api
 
-        # Create mock session and responses
         mock_session = MagicMock()
         mock_session_class.return_value = mock_session
 
-        # Mock nodes response
-        mock_nodes_response = Mock()
-        mock_nodes_response.json.return_value = {
+        # Mock unified search response with both nodes and edges (facts)
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
             "nodes": [
                 {"name": "Test Node", "summary": "Test summary"}
-            ]
-        }
-        mock_nodes_response.raise_for_status = Mock()
-
-        # Mock facts response
-        mock_facts_response = Mock()
-        mock_facts_response.json.return_value = {
-            "facts": [
+            ],
+            "edges": [
                 {"fact": "Test fact"}
             ]
         }
-        mock_facts_response.raise_for_status = Mock()
+        mock_response.raise_for_status = Mock()
 
-        mock_session.post.side_effect = [mock_nodes_response, mock_facts_response]
+        mock_session.post.return_value = mock_response
 
         result = query_graphiti_api("test query")
 
@@ -236,16 +230,13 @@ class TestQueryGraphitiAPI:
         mock_session = MagicMock()
         mock_session_class.return_value = mock_session
 
-        # Mock empty responses
-        mock_nodes_response = Mock()
-        mock_nodes_response.json.return_value = {"nodes": []}
-        mock_nodes_response.raise_for_status = Mock()
+        # Mock empty unified response
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"nodes": [], "edges": []}
+        mock_response.raise_for_status = Mock()
 
-        mock_facts_response = Mock()
-        mock_facts_response.json.return_value = {"facts": []}
-        mock_facts_response.raise_for_status = Mock()
-
-        mock_session.post.side_effect = [mock_nodes_response, mock_facts_response]
+        mock_session.post.return_value = mock_response
 
         result = query_graphiti_api("test query")
 
@@ -269,51 +260,49 @@ class TestQueryGraphitiAPI:
 
     @patch('webhook_server.app.requests.Session')
     def test_query_graphiti_uses_custom_limits(self, mock_session_class):
-        """Test that custom max_nodes and max_facts are used."""
+        """Test that custom max_nodes limit is used in unified config."""
         from webhook_server.app import query_graphiti_api
 
         mock_session = MagicMock()
         mock_session_class.return_value = mock_session
 
         mock_response = Mock()
-        mock_response.json.return_value = {"nodes": [], "facts": []}
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"nodes": [], "edges": []}
         mock_response.raise_for_status = Mock()
         mock_session.post.return_value = mock_response
 
         query_graphiti_api("test", max_nodes=15, max_facts=25)
 
-        # Check that the payloads included custom limits
+        # Check that the unified payload included custom limit
         calls = mock_session.post.call_args_list
-        nodes_call = calls[0]
-        facts_call = calls[1]
+        search_call = calls[0]
 
-        assert nodes_call[1]['json']['max_nodes'] == 15
-        assert facts_call[1]['json']['max_facts'] == 25
+        # Unified API uses config.limit for max results
+        assert search_call[1]['json']['config']['limit'] == 15
 
     @patch('webhook_server.app.requests.Session')
     def test_query_graphiti_deduplicates_facts(self, mock_session_class):
-        """Test that duplicate facts are deduplicated."""
+        """Test that duplicate facts (edges) are deduplicated."""
         from webhook_server.app import query_graphiti_api
 
         mock_session = MagicMock()
         mock_session_class.return_value = mock_session
 
-        mock_nodes_response = Mock()
-        mock_nodes_response.json.return_value = {"nodes": []}
-        mock_nodes_response.raise_for_status = Mock()
-
-        # Return duplicate facts
-        mock_facts_response = Mock()
-        mock_facts_response.json.return_value = {
-            "facts": [
+        # Return duplicate edges in unified response
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "nodes": [],
+            "edges": [
                 {"fact": "Duplicate fact"},
                 {"fact": "Duplicate fact"},
                 {"fact": "Unique fact"}
             ]
         }
-        mock_facts_response.raise_for_status = Mock()
+        mock_response.raise_for_status = Mock()
 
-        mock_session.post.side_effect = [mock_nodes_response, mock_facts_response]
+        mock_session.post.return_value = mock_response
 
         result = query_graphiti_api("test")
 

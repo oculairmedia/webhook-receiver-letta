@@ -23,7 +23,11 @@
       "Bash(curl -s http://192.168.50.90:8080/v1/meta 2>&1 | head -20)",
       "Bash(cd /opt/stacks/letta-webhook-receiver-new/agent_registry_service && docker-compose up -d)",
       "Bash(cd /opt/stacks/letta-webhook-receiver-new/agent_registry_service && pip3 install -q flask weaviate-client sentence-transformers 2>&1 | grep -v \"already satisfied\" | head -20)",
-      "Bash(cd /opt/stacks/letta-webhook-receiver-new/agent_registry_service && docker build -t agent-registry:latest . 2>&1 | tail -30)"
+      "Bash(cd /opt/stacks/letta-webhook-receiver-new/agent_registry_service && docker build -t agent-registry:latest . 2>&1 | tail -30)",
+      "Bash(curl -s http://192.168.50.90:8020/health | jq '.')",
+      "Bash(curl -s http://192.168.50.90:8003/health | jq '.')",
+      "Bash(curl -s http://192.168.50.90:8003/ 2>&1 | head -20)",
+      "Bash(curl -s http://192.168.50.90:8021/api/v1/agents/search?query=test&limit=3 2>&1)"
     ]
   }
 }

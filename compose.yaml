@@ -1,5 +1,4 @@
-version: '3.8'
-
+version: "3.8"
 services:
   # Main Letta Webhook Receiver Service
   webhook-receiver:
@@ -9,28 +8,23 @@ services:
     image: letta-webhook-receiver-new:latest
     container_name: letta-webhook-receiver
     ports:
-      - "5005:5005"
+      - 5005:5005
     environment:
       - FLASK_ENV=production
-      # Core API Configuration
       - GRAPHITI_URL=http://192.168.50.90:3004
       - LETTA_BASE_URL=${LETTA_BASE_URL:-https://letta2.oculair.ca}
       - LETTA_PASSWORD=${LETTA_PASSWORD}
       - CEREBRAS_API_KEY=${CEREBRAS_API_KEY}
-      # Context Retrieval Configuration
       - GRAPHITI_MAX_NODES=${GRAPHITI_MAX_NODES:-15}
       - GRAPHITI_MAX_FACTS=${GRAPHITI_MAX_FACTS:-20}
       - GRAPHITI_WEIGHT_LAST_MESSAGE=${GRAPHITI_WEIGHT_LAST_MESSAGE:-0.6}
       - GRAPHITI_WEIGHT_PREVIOUS_ASSISTANT_MESSAGE=${GRAPHITI_WEIGHT_PREVIOUS_ASSISTANT_MESSAGE:-0.25}
       - GRAPHITI_WEIGHT_PRIOR_USER_MESSAGE=${GRAPHITI_WEIGHT_PRIOR_USER_MESSAGE:-0.15}
-      # External Query Configuration
       - EXTERNAL_QUERY_ENABLED=${EXTERNAL_QUERY_ENABLED:-true}
       - EXTERNAL_QUERY_API_URL=${EXTERNAL_QUERY_API_URL:-http://192.168.50.90:5401/}
       - EXTERNAL_QUERY_TIMEOUT=${EXTERNAL_QUERY_TIMEOUT:-10}
-      # Query Refinement Configuration
       - QUERY_REFINEMENT_ENABLED=${QUERY_REFINEMENT_ENABLED:-true}
       - QUERY_REFINEMENT_TEMPERATURE=${QUERY_REFINEMENT_TEMPERATURE:-0.3}
-      # Application Configuration
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - DEBUG_MODE=${DEBUG_MODE:-false}
     restart: unless-stopped
@@ -38,31 +32,34 @@ services:
       - letta-network
       - agent-registry-network
       - letta-proxy_letta-net
-
   # Weaviate Vector Database for Agent Registry
   weaviate:
     image: semitechnologies/weaviate:1.25.0
     container_name: agent-registry-weaviate
     ports:
-      - "8092:8080"
-      - "50052:50051"
+      - 8092:8080
+      - 50052:50051
     environment:
       QUERY_DEFAULTS_LIMIT: 25
-      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
-      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
-      DEFAULT_VECTORIZER_MODULE: 'none'
-      CLUSTER_HOSTNAME: 'node1'
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+      PERSISTENCE_DATA_PATH: /var/lib/weaviate
+      DEFAULT_VECTORIZER_MODULE: none
+      CLUSTER_HOSTNAME: node1
     volumes:
       - weaviate_data:/var/lib/weaviate
     restart: unless-stopped
     networks:
       - agent-registry-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/v1/.well-known/ready"]
+      test:
+        - CMD
+        - wget
+        - --spider
+        - -q
+        - http://localhost:8080/v1/.well-known/ready
       interval: 10s
       timeout: 5s
       retries: 5
-
   # Agent Registry Service
   agent-registry:
     build:
@@ -70,13 +67,13 @@ services:
       dockerfile: Dockerfile
     container_name: agent-registry-service
     ports:
-      - "8021:8021"
+      - 8021:8021
     environment:
-      WEAVIATE_URL: "http://weaviate:8080"
-      OLLAMA_BASE_URL: "http://192.168.50.80:11434"
-      OLLAMA_EMBEDDING_MODEL: "dengcao/Qwen3-Embedding-4B:Q4_K_M"
+      WEAVIATE_URL: http://weaviate:8080
+      OLLAMA_BASE_URL: http://192.168.50.80:11434
+      OLLAMA_EMBEDDING_MODEL: dengcao/Qwen3-Embedding-4B:Q4_K_M
       EMBEDDING_DIMENSION: 2560
-      EMBEDDING_PROVIDER: "ollama"
+      EMBEDDING_PROVIDER: ollama
       PORT: 8021
     depends_on:
       weaviate:
@@ -85,7 +82,6 @@ services:
     networks:
       - agent-registry-network
       - letta-network
-
   # Agent Registry Sync Service
   agent-registry-sync:
     build:
@@ -94,14 +90,14 @@ services:
     container_name: agent-registry-sync
     command: python sync_service.py
     environment:
-      WEAVIATE_URL: "http://weaviate:8080"
-      OLLAMA_BASE_URL: "http://192.168.50.80:11434"
-      OLLAMA_EMBEDDING_MODEL: "dengcao/Qwen3-Embedding-4B:Q4_K_M"
+      WEAVIATE_URL: http://weaviate:8080
+      OLLAMA_BASE_URL: http://192.168.50.80:11434
+      OLLAMA_EMBEDDING_MODEL: dengcao/Qwen3-Embedding-4B:Q4_K_M
       EMBEDDING_DIMENSION: 2560
-      EMBEDDING_PROVIDER: "ollama"
-      LETTA_BASE_URL: "https://letta2.oculair.ca"
-      LETTA_PASSWORD: "lettaSecurePass123"
-      SYNC_INTERVAL: "${AGENT_SYNC_INTERVAL:-300}"
+      EMBEDDING_PROVIDER: ollama
+      LETTA_BASE_URL: https://letta2.oculair.ca
+      LETTA_PASSWORD: lettaSecurePass123
+      SYNC_INTERVAL: ${AGENT_SYNC_INTERVAL:-300}
     depends_on:
       weaviate:
         condition: service_healthy
@@ -111,19 +107,19 @@ services:
       - letta-network
     healthcheck:
       disable: true
-
   # Agent Registry MCP Server
   agent-registry-mcp:
     build:
       context: ./agent_registry_service
       dockerfile: Dockerfile
     container_name: agent-registry-mcp
-    command: bash -c "pip install -r requirements-mcp.txt && fastmcp run mcp_server.py --transport http --port 8000 --host 0.0.0.0"
+    command: bash -c "pip install -r requirements-mcp.txt && fastmcp run
+      mcp_server.py --transport http --port 8000 --host 0.0.0.0"
     ports:
-      - "8022:8000"
+      - 8022:8000
     environment:
-      AGENT_REGISTRY_URL: "http://agent-registry:8021"
-      AGENT_REGISTRY_MCP_LOG_LEVEL: "INFO"
+      AGENT_REGISTRY_URL: http://agent-registry:8021
+      AGENT_REGISTRY_MCP_LOG_LEVEL: INFO
       AGENT_REGISTRY_MAX_AGENTS: "10"
       AGENT_REGISTRY_MIN_SCORE: "0.3"
     depends_on:
@@ -133,18 +129,16 @@ services:
       - agent-registry-network
     healthcheck:
       disable: true
-
 volumes:
   weaviate_data:
     driver: local
   model_cache:
     driver: local
-
 networks:
+  agent-registry-network:
+    driver: bridge
   letta-network:
     external: true
     name: letta_network
-  agent-registry-network:
-    driver: bridge
   letta-proxy_letta-net:
     external: true

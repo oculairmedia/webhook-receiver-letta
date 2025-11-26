@@ -20,7 +20,8 @@ MAX_CONTEXT_SNIPPET_LENGTH = 6000
 
 def get_api_url(path: str) -> str:
     """Construct API URL following Letta's v1 convention."""
-    base = f"{LETTA_BASE_URL}/v1".rstrip("/")
+    base = LETTA_BASE_URL.rstrip("/")
+    base = f"{base}/v1"
     path = path.lstrip("/")
     return f"{base}/{path}"
 

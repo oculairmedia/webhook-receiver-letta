@@ -371,3 +371,65 @@ class TestFindAttachTools:
 
         assert "Error" in result
         assert "unexpected" in result.lower()
+
+    @patch('tool_manager.requests.post')
+    def test_find_attach_tools_return_structured_true(self, mock_post):
+        """Test returning structured dict when return_structured=True."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "success": True,
+            "details": {
+                "successful_attachments": [
+                    {"tool_id": "tool-123", "name": "search", "match_score": 85}
+                ],
+                "detached_tools": ["tool-old"],
+                "preserved_tools": ["tool-keep"]
+            }
+        }
+        mock_response.raise_for_status = Mock()
+        mock_post.return_value = mock_response
+
+        result = find_attach_tools(query="search", agent_id="agent-789", return_structured=True)
+
+        # Should return a dict instead of string
+        assert isinstance(result, dict)
+        assert result["success"] is True
+        assert "details" in result
+        assert len(result["details"]["successful_attachments"]) == 1
+
+    @patch('tool_manager.requests.post')
+    def test_find_attach_tools_return_structured_false(self, mock_post):
+        """Test returning string when return_structured=False (default)."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "success": True,
+            "details": {
+                "successful_attachments": [],
+                "detached_tools": [],
+                "preserved_tools": []
+            }
+        }
+        mock_response.raise_for_status = Mock()
+        mock_post.return_value = mock_response
+
+        result = find_attach_tools(query="search", agent_id="agent-789", return_structured=False)
+
+        # Should return a string
+        assert isinstance(result, str)
+
+    @patch('tool_manager.requests.post')
+    def test_find_attach_tools_structured_error_response(self, mock_post):
+        """Test error response when return_structured=True.
+        
+        Note: Currently error responses return strings even when return_structured=True.
+        This test documents the current behavior.
+        """
+        mock_post.side_effect = requests.exceptions.RequestException("Network error")
+
+        result = find_attach_tools(query="test", agent_id="agent-789", return_structured=True)
+
+        # Current behavior: errors return strings regardless of return_structured
+        # The string should contain "Error"
+        assert "Error" in str(result)

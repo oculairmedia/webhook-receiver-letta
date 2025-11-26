@@ -30,7 +30,7 @@ MATRIX_CLIENT_URL = os.environ.get("MATRIX_CLIENT_URL", "http://192.168.50.90:80
 known_agents = set()
 agent_tracking_lock = threading.Lock()
 
-def track_agent_and_notify(agent_id: str) -> None:
+def track_agent_and_notify(agent_id: str | None) -> None:
     """Track agent and notify Matrix client if new agent is detected. Also registers agent with agent registry."""
     if not agent_id or not agent_id.startswith("agent-"):
         return
