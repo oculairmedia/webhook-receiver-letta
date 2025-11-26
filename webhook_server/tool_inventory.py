@@ -72,7 +72,8 @@ def get_agent_tools_with_details(agent_id: str) -> List[Dict]:
         return []
     
     try:
-        url = get_api_url(f"agents/{agent_id}/tools")
+        # Use limit=500 to ensure we get all tools (API defaults to 10)
+        url = get_api_url(f"agents/{agent_id}/tools?limit=500")
         headers = {**LETTA_API_HEADERS, "user_id": agent_id}
         
         print(f"[TOOL_INVENTORY] Fetching tools for agent {agent_id}")
@@ -271,7 +272,7 @@ def format_tool_inventory(agent_id: str, tools: List[Dict],
             category_tools = categorized[category]
             lines.append(f"═══ {category} ═══")
             
-            for tool in category_tools[:5]:  # Limit to 5 per category
+            for tool in category_tools:  # Show all tools in category
                 # Skip if already shown in recent
                 if tool.get("id") not in recent_tool_ids:
                     lines.append(format_tool_entry(tool, include_description=True))
@@ -285,7 +286,7 @@ def format_tool_inventory(agent_id: str, tools: List[Dict],
             category_tools = categorized[category]
             lines.append(f"═══ {category} ═══")
             
-            for tool in category_tools[:5]:  # Limit to 5 per category
+            for tool in category_tools:  # Show all tools in category
                 if tool.get("id") not in recent_tool_ids:
                     lines.append(format_tool_entry(tool, include_description=True))
             
