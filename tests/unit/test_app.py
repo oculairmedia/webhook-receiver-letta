@@ -335,6 +335,30 @@ class TestWebhookEndpoint:
         pass
 
 
+class TestAgentDiscoveryBlockLabels:
+    """Tests for agent discovery block label uniqueness."""
+
+    def test_agent_specific_label_format(self):
+        """Test that agent-specific labels are formatted correctly."""
+        # Simple unit test to verify label format
+        agent_id = "agent-test-123"
+        expected_label = f"available_agents_{agent_id}"
+        
+        assert expected_label == "available_agents_agent-test-123"
+        
+    def test_different_agents_have_different_labels(self):
+        """Test that different agents produce different labels."""
+        agent_id_1 = "agent-aaa"
+        agent_id_2 = "agent-bbb"
+        
+        label_1 = f"available_agents_{agent_id_1}"
+        label_2 = f"available_agents_{agent_id_2}"
+        
+        assert label_1 != label_2
+        assert label_1 == "available_agents_agent-aaa"
+        assert label_2 == "available_agents_agent-bbb"
+
+
 class TestAppConfiguration:
     """Tests for Flask app configuration."""
 

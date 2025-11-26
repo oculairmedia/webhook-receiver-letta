@@ -351,11 +351,11 @@ def webhook_receiver():
                 agent_context = format_agent_context(agent_results)
                 print(f"[AGENT_DISCOVERY] Formatted agent context ({len(agent_context)} chars)")
                 agent_block_data = {
-                    "label": "available_agents",
+                    "label": f"available_agents_{agent_id}",
                     "value": agent_context,
                     "metadata": {"source": "agent_registry", "event_type": event_type}
                 }
-                print(f"[AGENT_DISCOVERY] Creating available_agents memory block for agent {agent_id}")
+                print(f"[AGENT_DISCOVERY] Creating available_agents_{agent_id} memory block for agent {agent_id}")
                 try:
                     block_result = create_memory_block(agent_block_data, agent_id)
                     print(f"[AGENT_DISCOVERY] Block creation result: {block_result.get('id') if block_result else 'None'}")
