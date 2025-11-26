@@ -73,7 +73,8 @@ def get_agent_tools(agent_id: str) -> List[str]: # Return type is List of string
 
 # User-provided find_attach_tools function (modified slightly for consistency and robustness)
 def find_attach_tools(query: str = None, agent_id: str = None, keep_tools: str = None, 
-                        limit: int = 5, min_score: float = 75.0, request_heartbeat: bool = False) -> str:
+                        limit: int = 5, min_score: float = 75.0, request_heartbeat: bool = False,
+                        return_structured: bool = False):
     """
     Silently manage tools for the agent. Uses port 8020 and no specific auth headers beyond Content-Type.
     
@@ -85,9 +86,10 @@ def find_attach_tools(query: str = None, agent_id: str = None, keep_tools: str =
         limit (int): Maximum number of tools to find (default: 5)
         min_score (float): Minimum match score 0-100 (default: 75.0) - INCREASED for more aggressive filtering
         request_heartbeat (bool): Whether to request an immediate heartbeat (default: False)
+        return_structured (bool): If True, return the full API response dict instead of string message
     
     Returns:
-        str: Success message or error details if something goes wrong
+        str or dict: Success message (str) or full API response (dict) if return_structured=True
     """
     # URL for attaching tools (port 8020)
     url = "http://192.168.50.90:8020/api/v1/tools/attach"
@@ -131,6 +133,10 @@ def find_attach_tools(query: str = None, agent_id: str = None, keep_tools: str =
             print(f"Warning: Could not decode JSON from attach response. Status: {response.status_code}, Text: {response_text_for_error[:200]}", file=sys.stderr)
 
         response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
+        
+        # If return_structured is True, return the full response dict
+        if return_structured and result:
+            return result
         
         # If raise_for_status didn't trigger, and we have a result
         if result and result.get("success"):

@@ -12,10 +12,11 @@ from urllib3.util.retry import Retry
 from flask import Flask, request, jsonify
 
 from .config import get_api_url
-from .memory_manager import create_memory_block
+from .memory_manager import create_memory_block, create_tool_inventory_block
 from .integrations import arxiv_integration, gdelt_integration
 from .context_utils import _build_cumulative_context
 from .agent_registry import register_agent, query_agent_registry, format_agent_context
+from .tool_inventory import build_tool_inventory_block
 
 # Add the parent directory to the path to import tool_manager
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -368,6 +369,7 @@ def webhook_receiver():
             # Don't fail the whole webhook if agent discovery fails
 
         # Auto tool attachment - find and attach relevant tools based on the prompt
+        tool_attachment_data = None
         try:
             print(f"[AUTO_TOOL_ATTACHMENT] Searching for relevant tools for prompt: '{prompt[:100]}...'")
             
@@ -377,18 +379,43 @@ def webhook_receiver():
             keep_tools_list = ["*", find_tools_id]
             keep_tools_str = ",".join(keep_tools_list)
             
-            tool_result = find_attach_tools(
+            # Call with return_structured=True to get full API response
+            tool_attachment_data = find_attach_tools(
                 query=prompt,
                 agent_id=agent_id,
                 keep_tools=keep_tools_str,  # Keep existing tools and specific required tool
                 limit=3,  # Limit to 3 new tools to avoid overwhelming
                 min_score=70.0,  # Slightly lower threshold for relevance
-                request_heartbeat=False
+                request_heartbeat=False,
+                return_structured=True  # Get structured data for tool inventory
             )
-            print(f"[AUTO_TOOL_ATTACHMENT] Tool attachment result: {tool_result}")
+            print(f"[AUTO_TOOL_ATTACHMENT] Tool attachment result: {tool_attachment_data}")
         except Exception as e:
             print(f"[AUTO_TOOL_ATTACHMENT] Error during tool attachment: {e}")
             # Don't fail the whole webhook if tool attachment fails
+        
+        # Tool inventory memory block - track attached tools
+        try:
+            print(f"[TOOL_INVENTORY] Building tool inventory for agent {agent_id}")
+            inventory_result = build_tool_inventory_block(
+                agent_id=agent_id,
+                prompt=prompt,
+                attachment_result=tool_attachment_data
+            )
+            
+            if inventory_result.get("success"):
+                inventory_content = inventory_result.get("content", "")
+                print(f"[TOOL_INVENTORY] Generated inventory ({len(inventory_content)} chars)")
+                
+                # Create/update the tool inventory memory block
+                inventory_block = create_tool_inventory_block(agent_id, inventory_content)
+                print(f"[TOOL_INVENTORY] Block updated: {inventory_block.get('id')}")
+            else:
+                error = inventory_result.get("error", "Unknown error")
+                print(f"[TOOL_INVENTORY] Failed to build inventory: {error}")
+        except Exception as e:
+            print(f"[TOOL_INVENTORY] Error updating tool inventory: {e}")
+            # Don't fail the whole webhook if inventory update fails
 
         return jsonify({"status": "success", "message": "Context processed and tools attached"}), 200
 
