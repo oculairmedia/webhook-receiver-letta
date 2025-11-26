@@ -148,3 +148,183 @@ def get_find_tools_id_with_fallback(agent_id: Optional[str] = None, fallback_id:
     else:
         print(f"[TOOL_LOOKUP] Using fallback ID: {fallback_id}", file=sys.stderr)
         return fallback_id
+
+
+def get_tool_id_by_name(tool_name: str) -> Optional[str]:
+    """
+    Find a tool ID by its name from the global tools list.
+    
+    Args:
+        tool_name: The name of the tool to find
+        
+    Returns:
+        str: The tool ID if found, None otherwise
+    """
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    
+    if LETTA_API_KEY:
+        headers["Authorization"] = f"Bearer {LETTA_API_KEY}"
+    
+    try:
+        url = f"{LETTA_URL}/tools"
+        response = requests.get(url, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            tools = response.json()
+            
+            for tool in tools:
+                if tool.get('name', '').lower() == tool_name.lower():
+                    return tool.get('id')
+        
+        return None
+        
+    except Exception as e:
+        print(f"[TOOL_LOOKUP] Error finding tool by name '{tool_name}': {e}", file=sys.stderr)
+        return None
+
+
+def get_agent_tool_names(agent_id: str) -> set:
+    """
+    Get the set of tool names currently attached to an agent.
+    
+    Args:
+        agent_id: The agent ID
+        
+    Returns:
+        set: Set of tool names (lowercase) attached to the agent
+    """
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    
+    if LETTA_API_KEY:
+        headers["Authorization"] = f"Bearer {LETTA_API_KEY}"
+    
+    try:
+        url = f"{LETTA_URL}/agents/{agent_id}/tools"
+        response = requests.get(url, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            tools = response.json()
+            return {tool.get('name', '').lower() for tool in tools if tool.get('name')}
+        
+        return set()
+        
+    except Exception as e:
+        print(f"[TOOL_LOOKUP] Error getting agent tools: {e}", file=sys.stderr)
+        return set()
+
+
+def attach_tool_to_agent(agent_id: str, tool_id: str) -> bool:
+    """
+    Attach a tool to an agent via the Letta API.
+    
+    Args:
+        agent_id: The agent ID
+        tool_id: The tool ID to attach
+        
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    
+    if LETTA_API_KEY:
+        headers["Authorization"] = f"Bearer {LETTA_API_KEY}"
+    
+    try:
+        url = f"{LETTA_URL}/agents/{agent_id}/tools/attach/{tool_id}"
+        print(f"[PROTECTED_TOOLS] Attaching tool {tool_id} to agent {agent_id}", file=sys.stderr)
+        
+        response = requests.patch(url, headers=headers, json={}, timeout=10)
+        
+        if response.status_code in [200, 201]:
+            print(f"[PROTECTED_TOOLS] Successfully attached tool {tool_id}", file=sys.stderr)
+            return True
+        elif response.status_code == 409:
+            # Already attached
+            print(f"[PROTECTED_TOOLS] Tool {tool_id} already attached (409)", file=sys.stderr)
+            return True
+        else:
+            print(f"[PROTECTED_TOOLS] Failed to attach tool: {response.status_code} - {response.text}", file=sys.stderr)
+            return False
+            
+    except Exception as e:
+        print(f"[PROTECTED_TOOLS] Error attaching tool: {e}", file=sys.stderr)
+        return False
+
+
+def ensure_protected_tools(agent_id: str, protected_tools_config: str = None) -> dict:
+    """
+    Ensure protected tools are attached to an agent.
+    
+    This function checks if protected tools are attached to the agent,
+    and attaches any missing ones. Protected tools are specified by name
+    and looked up to get their IDs.
+    
+    Args:
+        agent_id: The agent ID
+        protected_tools_config: Comma-separated list of tool names to protect
+                                (defaults to PROTECTED_TOOLS from config)
+                                
+    Returns:
+        dict: Result with 'success' (bool), 'attached' (list), 'already_present' (list), 'failed' (list)
+    """
+    if not agent_id:
+        return {"success": False, "error": "No agent_id provided", "attached": [], "already_present": [], "failed": []}
+    
+    # Get protected tools from config if not provided
+    if protected_tools_config is None:
+        from webhook_server.config import PROTECTED_TOOLS
+        protected_tools_config = PROTECTED_TOOLS
+    
+    # Parse protected tool names
+    protected_tool_names = [name.strip().lower() for name in protected_tools_config.split(',') if name.strip()]
+    
+    if not protected_tool_names:
+        return {"success": True, "attached": [], "already_present": [], "failed": [], "message": "No protected tools configured"}
+    
+    print(f"[PROTECTED_TOOLS] Ensuring protected tools for agent {agent_id}: {protected_tool_names}", file=sys.stderr)
+    
+    # Get current agent tools
+    current_tool_names = get_agent_tool_names(agent_id)
+    print(f"[PROTECTED_TOOLS] Agent currently has tools: {current_tool_names}", file=sys.stderr)
+    
+    attached = []
+    already_present = []
+    failed = []
+    
+    for tool_name in protected_tool_names:
+        if tool_name in current_tool_names:
+            print(f"[PROTECTED_TOOLS] Tool '{tool_name}' already attached", file=sys.stderr)
+            already_present.append(tool_name)
+        else:
+            # Need to attach this tool
+            print(f"[PROTECTED_TOOLS] Tool '{tool_name}' missing, looking up ID...", file=sys.stderr)
+            
+            tool_id = get_tool_id_by_name(tool_name)
+            
+            if tool_id:
+                if attach_tool_to_agent(agent_id, tool_id):
+                    attached.append({"name": tool_name, "id": tool_id})
+                else:
+                    failed.append({"name": tool_name, "id": tool_id, "reason": "attach_failed"})
+            else:
+                print(f"[PROTECTED_TOOLS] Could not find tool ID for '{tool_name}'", file=sys.stderr)
+                failed.append({"name": tool_name, "reason": "tool_not_found"})
+    
+    result = {
+        "success": len(failed) == 0,
+        "attached": attached,
+        "already_present": already_present,
+        "failed": failed
+    }
+    
+    print(f"[PROTECTED_TOOLS] Result: {result}", file=sys.stderr)
+    return result

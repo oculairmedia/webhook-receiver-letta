@@ -359,6 +359,229 @@ class TestAgentDiscoveryBlockLabels:
         assert label_2 == "available_agents_agent-bbb"
 
 
+class TestProtectedToolsConfig:
+    """Tests for protected tools configuration."""
+
+    def test_protected_tools_default_value(self):
+        """Test that PROTECTED_TOOLS has a default value."""
+        from webhook_server.config import PROTECTED_TOOLS_DEFAULT
+        assert PROTECTED_TOOLS_DEFAULT == "find_agents"
+
+    def test_protected_tools_config_exists(self):
+        """Test that PROTECTED_TOOLS config is accessible."""
+        from webhook_server.config import PROTECTED_TOOLS
+        assert PROTECTED_TOOLS is not None
+
+
+class TestEnsureProtectedTools:
+    """Tests for ensure_protected_tools function."""
+
+    def test_ensure_protected_tools_requires_agent_id(self):
+        """Test that function requires agent_id."""
+        from letta_tool_utils import ensure_protected_tools
+        
+        result = ensure_protected_tools(None)
+        
+        assert result["success"] is False
+        assert "No agent_id provided" in result.get("error", "")
+
+    def test_ensure_protected_tools_empty_config(self):
+        """Test with empty protected tools config."""
+        from letta_tool_utils import ensure_protected_tools
+        
+        result = ensure_protected_tools("agent-123", protected_tools_config="")
+        
+        assert result["success"] is True
+        assert result["attached"] == []
+        assert "No protected tools configured" in result.get("message", "")
+
+    @patch('letta_tool_utils.get_agent_tool_names')
+    def test_ensure_protected_tools_already_attached(self, mock_get_tools):
+        """Test when protected tool is already attached."""
+        from letta_tool_utils import ensure_protected_tools
+        
+        # Mock that find_agents is already attached
+        mock_get_tools.return_value = {"find_agents", "send_message", "core_memory_append"}
+        
+        result = ensure_protected_tools("agent-123", protected_tools_config="find_agents")
+        
+        assert result["success"] is True
+        assert "find_agents" in result["already_present"]
+        assert len(result["attached"]) == 0
+        mock_get_tools.assert_called_once_with("agent-123")
+
+    @patch('letta_tool_utils.attach_tool_to_agent')
+    @patch('letta_tool_utils.get_tool_id_by_name')
+    @patch('letta_tool_utils.get_agent_tool_names')
+    def test_ensure_protected_tools_attaches_missing(self, mock_get_tools, mock_get_id, mock_attach):
+        """Test that missing protected tool is attached."""
+        from letta_tool_utils import ensure_protected_tools
+        
+        # Mock that find_agents is NOT attached
+        mock_get_tools.return_value = {"send_message", "core_memory_append"}
+        mock_get_id.return_value = "tool-find-agents-123"
+        mock_attach.return_value = True
+        
+        result = ensure_protected_tools("agent-123", protected_tools_config="find_agents")
+        
+        assert result["success"] is True
+        assert len(result["attached"]) == 1
+        assert result["attached"][0]["name"] == "find_agents"
+        assert result["attached"][0]["id"] == "tool-find-agents-123"
+        mock_attach.assert_called_once_with("agent-123", "tool-find-agents-123")
+
+    @patch('letta_tool_utils.get_tool_id_by_name')
+    @patch('letta_tool_utils.get_agent_tool_names')
+    def test_ensure_protected_tools_handles_missing_tool_id(self, mock_get_tools, mock_get_id):
+        """Test handling when tool ID cannot be found."""
+        from letta_tool_utils import ensure_protected_tools
+        
+        mock_get_tools.return_value = set()
+        mock_get_id.return_value = None  # Tool not found
+        
+        result = ensure_protected_tools("agent-123", protected_tools_config="nonexistent_tool")
+        
+        assert result["success"] is False
+        assert len(result["failed"]) == 1
+        assert result["failed"][0]["name"] == "nonexistent_tool"
+        assert result["failed"][0]["reason"] == "tool_not_found"
+
+    @patch('letta_tool_utils.attach_tool_to_agent')
+    @patch('letta_tool_utils.get_tool_id_by_name')
+    @patch('letta_tool_utils.get_agent_tool_names')
+    def test_ensure_protected_tools_handles_attach_failure(self, mock_get_tools, mock_get_id, mock_attach):
+        """Test handling when attach operation fails."""
+        from letta_tool_utils import ensure_protected_tools
+        
+        mock_get_tools.return_value = set()
+        mock_get_id.return_value = "tool-123"
+        mock_attach.return_value = False  # Attach failed
+        
+        result = ensure_protected_tools("agent-123", protected_tools_config="find_agents")
+        
+        assert result["success"] is False
+        assert len(result["failed"]) == 1
+        assert result["failed"][0]["reason"] == "attach_failed"
+
+    @patch('letta_tool_utils.attach_tool_to_agent')
+    @patch('letta_tool_utils.get_tool_id_by_name')
+    @patch('letta_tool_utils.get_agent_tool_names')
+    def test_ensure_protected_tools_multiple_tools(self, mock_get_tools, mock_get_id, mock_attach):
+        """Test with multiple protected tools configured."""
+        from letta_tool_utils import ensure_protected_tools
+        
+        # Only one tool attached
+        mock_get_tools.return_value = {"find_agents"}
+        # Return different IDs for different tools
+        mock_get_id.side_effect = lambda name: f"tool-{name}-id"
+        mock_attach.return_value = True
+        
+        result = ensure_protected_tools("agent-123", protected_tools_config="find_agents,find_tools,search")
+        
+        assert result["success"] is True
+        assert "find_agents" in result["already_present"]
+        assert len(result["attached"]) == 2  # find_tools and search
+
+
+class TestGetToolIdByName:
+    """Tests for get_tool_id_by_name function."""
+
+    @patch('letta_tool_utils.requests.get')
+    def test_get_tool_id_by_name_success(self, mock_get):
+        """Test successful tool ID lookup by name."""
+        from letta_tool_utils import get_tool_id_by_name
+        
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = [
+            {"name": "find_agents", "id": "tool-123"},
+            {"name": "search", "id": "tool-456"}
+        ]
+        mock_get.return_value = mock_response
+        
+        result = get_tool_id_by_name("find_agents")
+        
+        assert result == "tool-123"
+
+    @patch('letta_tool_utils.requests.get')
+    def test_get_tool_id_by_name_not_found(self, mock_get):
+        """Test tool ID lookup when tool not found."""
+        from letta_tool_utils import get_tool_id_by_name
+        
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = [
+            {"name": "other_tool", "id": "tool-123"}
+        ]
+        mock_get.return_value = mock_response
+        
+        result = get_tool_id_by_name("find_agents")
+        
+        assert result is None
+
+    @patch('letta_tool_utils.requests.get')
+    def test_get_tool_id_by_name_case_insensitive(self, mock_get):
+        """Test that tool lookup is case insensitive."""
+        from letta_tool_utils import get_tool_id_by_name
+        
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = [
+            {"name": "Find_Agents", "id": "tool-123"}
+        ]
+        mock_get.return_value = mock_response
+        
+        result = get_tool_id_by_name("find_agents")
+        
+        assert result == "tool-123"
+
+
+class TestAttachToolToAgent:
+    """Tests for attach_tool_to_agent function."""
+
+    @patch('letta_tool_utils.requests.patch')
+    def test_attach_tool_success(self, mock_patch):
+        """Test successful tool attachment."""
+        from letta_tool_utils import attach_tool_to_agent
+        
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_patch.return_value = mock_response
+        
+        result = attach_tool_to_agent("agent-123", "tool-456")
+        
+        assert result is True
+        mock_patch.assert_called_once()
+
+    @patch('letta_tool_utils.requests.patch')
+    def test_attach_tool_already_attached(self, mock_patch):
+        """Test when tool is already attached (409 conflict)."""
+        from letta_tool_utils import attach_tool_to_agent
+        
+        mock_response = Mock()
+        mock_response.status_code = 409
+        mock_patch.return_value = mock_response
+        
+        result = attach_tool_to_agent("agent-123", "tool-456")
+        
+        # Should return True since tool is effectively attached
+        assert result is True
+
+    @patch('letta_tool_utils.requests.patch')
+    def test_attach_tool_failure(self, mock_patch):
+        """Test handling of attachment failure."""
+        from letta_tool_utils import attach_tool_to_agent
+        
+        mock_response = Mock()
+        mock_response.status_code = 500
+        mock_response.text = "Internal Server Error"
+        mock_patch.return_value = mock_response
+        
+        result = attach_tool_to_agent("agent-123", "tool-456")
+        
+        assert result is False
+
+
 class TestAppConfiguration:
     """Tests for Flask app configuration."""
 

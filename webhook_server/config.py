@@ -18,6 +18,13 @@ GRAPHITI_MAX_FACTS = int(os.environ.get("GRAPHITI_MAX_FACTS", "20"))
 # Maximum context snippet length for cumulative context
 MAX_CONTEXT_SNIPPET_LENGTH = 6000
 
+# Protected tools configuration
+# These tools should always be attached to agents and never detached
+# Format: comma-separated list of tool IDs or tool names
+# Can be set via environment variable PROTECTED_TOOLS
+PROTECTED_TOOLS_DEFAULT = "find_agents"  # Tool names that should always be present
+PROTECTED_TOOLS = os.environ.get("PROTECTED_TOOLS", PROTECTED_TOOLS_DEFAULT)
+
 def get_api_url(path: str) -> str:
     """Construct API URL following Letta's v1 convention."""
     base = LETTA_BASE_URL.rstrip("/")

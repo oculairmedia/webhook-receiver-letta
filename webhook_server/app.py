@@ -21,7 +21,7 @@ from .tool_inventory import build_tool_inventory_block
 # Add the parent directory to the path to import tool_manager
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tool_manager import find_attach_tools
-from letta_tool_utils import get_find_tools_id_with_fallback
+from letta_tool_utils import get_find_tools_id_with_fallback, ensure_protected_tools
 
 app = Flask(__name__)
 
@@ -367,6 +367,18 @@ def webhook_receiver():
         except Exception as e:
             print(f"[AGENT_DISCOVERY] Error during agent discovery: {e}")
             # Don't fail the whole webhook if agent discovery fails
+
+        # Ensure protected tools are attached before auto-attachment
+        try:
+            print(f"[PROTECTED_TOOLS] Ensuring protected tools for agent {agent_id}")
+            protected_result = ensure_protected_tools(agent_id)
+            if protected_result.get("attached"):
+                print(f"[PROTECTED_TOOLS] Attached missing tools: {protected_result['attached']}")
+            if protected_result.get("failed"):
+                print(f"[PROTECTED_TOOLS] Failed to attach: {protected_result['failed']}")
+        except Exception as e:
+            print(f"[PROTECTED_TOOLS] Error ensuring protected tools: {e}")
+            # Don't fail the whole webhook if protected tools check fails
 
         # Auto tool attachment - find and attach relevant tools based on the prompt
         tool_attachment_data = None
