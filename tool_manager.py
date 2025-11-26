@@ -98,9 +98,30 @@ def find_attach_tools(query: str = None, agent_id: str = None, keep_tools: str =
     
     # Convert keep_tools string to list of strings.
     # The API endpoint for attach expects "keep_tools" to be a list of tool IDs.
+    # Handle "*" wildcard to mean "keep all current agent tools"
     keep_tool_ids_list: List[str] = []
     if keep_tools: # Handles None or empty string
         keep_tool_ids_list = [t.strip() for t in keep_tools.split(',') if t.strip()]
+        
+        # Expand "*" wildcard to actual tool IDs
+        if "*" in keep_tool_ids_list:
+            if agent_id:
+                print(f"[find_attach_tools] Expanding '*' wildcard for agent {agent_id}")
+                current_tool_ids = get_agent_tools(agent_id)
+                if current_tool_ids:
+                    # Remove "*" and add all current tool IDs
+                    keep_tool_ids_list.remove("*")
+                    keep_tool_ids_list.extend(current_tool_ids)
+                    # Remove duplicates while preserving order
+                    seen = set()
+                    keep_tool_ids_list = [x for x in keep_tool_ids_list if not (x in seen or seen.add(x))]
+                    print(f"[find_attach_tools] Expanded '*' to {len(current_tool_ids)} current tools")
+                else:
+                    print(f"[find_attach_tools] Warning: '*' specified but no tools found for agent {agent_id}")
+                    keep_tool_ids_list.remove("*")
+            else:
+                print(f"[find_attach_tools] Warning: '*' specified but no agent_id provided, removing wildcard")
+                keep_tool_ids_list.remove("*")
     
     payload: Dict[str, Any] = {
         "limit": limit, # Using the passed limit, which has a default in signature

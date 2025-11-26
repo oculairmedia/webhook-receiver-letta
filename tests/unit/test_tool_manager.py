@@ -433,3 +433,85 @@ class TestFindAttachTools:
         # Current behavior: errors return strings regardless of return_structured
         # The string should contain "Error"
         assert "Error" in str(result)
+
+    @patch('tool_manager.get_agent_tools')
+    @patch('tool_manager.requests.post')
+    def test_find_attach_tools_expands_wildcard_keep_tools(self, mock_post, mock_get_tools):
+        """Test that '*' wildcard in keep_tools is expanded to actual tool IDs."""
+        # Mock current tools for the agent
+        mock_get_tools.return_value = ["tool-existing-1", "tool-existing-2", "tool-existing-3"]
+        
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"success": True, "details": {}}
+        mock_response.raise_for_status = Mock()
+        mock_post.return_value = mock_response
+        
+        # Call with wildcard
+        find_attach_tools(query="test", agent_id="agent-123", keep_tools="*,tool-specific-4")
+        
+        # Verify get_agent_tools was called to expand the wildcard
+        mock_get_tools.assert_called_once_with("agent-123")
+        
+        # Check the payload sent to API
+        call_args = mock_post.call_args
+        payload = call_args[1]['json']
+        
+        # Should contain all existing tools plus the specific one, no "*"
+        assert "*" not in payload['keep_tools']
+        assert "tool-existing-1" in payload['keep_tools']
+        assert "tool-existing-2" in payload['keep_tools']
+        assert "tool-existing-3" in payload['keep_tools']
+        assert "tool-specific-4" in payload['keep_tools']
+        assert len(payload['keep_tools']) == 4
+
+    @patch('tool_manager.get_agent_tools')
+    @patch('tool_manager.requests.post')
+    def test_find_attach_tools_wildcard_without_agent_id(self, mock_post, mock_get_tools):
+        """Test that '*' wildcard is removed when no agent_id is provided."""
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"success": True, "details": {}}
+        mock_response.raise_for_status = Mock()
+        mock_post.return_value = mock_response
+        
+        # Call with wildcard but no agent_id
+        find_attach_tools(query="test", keep_tools="*,tool-specific")
+        
+        # Should NOT call get_agent_tools
+        mock_get_tools.assert_not_called()
+        
+        # Check payload - should not contain "*"
+        call_args = mock_post.call_args
+        payload = call_args[1]['json']
+        
+        assert "*" not in payload['keep_tools']
+        assert "tool-specific" in payload['keep_tools']
+        assert len(payload['keep_tools']) == 1
+
+    @patch('tool_manager.get_agent_tools')
+    @patch('tool_manager.requests.post')
+    def test_find_attach_tools_wildcard_removes_duplicates(self, mock_post, mock_get_tools):
+        """Test that wildcard expansion removes duplicate tool IDs."""
+        # Mock returns tool-1 and tool-2
+        mock_get_tools.return_value = ["tool-1", "tool-2"]
+        
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"success": True, "details": {}}
+        mock_response.raise_for_status = Mock()
+        mock_post.return_value = mock_response
+        
+        # Call with wildcard AND tool-1 explicitly (duplicate)
+        find_attach_tools(query="test", agent_id="agent-123", keep_tools="*,tool-1,tool-3")
+        
+        # Check payload - should have no duplicates
+        call_args = mock_post.call_args
+        payload = call_args[1]['json']
+        
+        # Count occurrences of tool-1
+        assert payload['keep_tools'].count("tool-1") == 1
+        assert "tool-2" in payload['keep_tools']
+        assert "tool-3" in payload['keep_tools']
+        # Should be 3 unique tools total
+        assert len(payload['keep_tools']) == 3
