@@ -12,7 +12,7 @@ from webhook_server.memory_manager import (
     create_memory_block,
     update_memory_block,
     attach_block_to_agent,
-    create_tool_inventory_block
+    # create_tool_inventory_block  # REMOVED - no longer needed
 )
 
 
@@ -350,125 +350,128 @@ class TestMemoryManagerEdgeCases:
         assert "456" in url
 
 
-class TestCreateToolInventoryBlock:
-    """Tests for create_tool_inventory_block function."""
-
-    @patch('webhook_server.memory_manager.find_memory_block')
-    @patch('webhook_server.memory_manager.requests.patch')
-    def test_update_existing_inventory_block(self, mock_patch, mock_find):
-        """Test updating an existing tool inventory block."""
-        existing_block = {
-            "id": "block-tool-inv",
-            "label": "available_tools",
-            "value": "Old inventory"
-        }
-        mock_find.return_value = (existing_block, True)
-
-        mock_response = Mock()
-        mock_response.json.return_value = {"id": "block-tool-inv", "value": "New inventory"}
-        mock_response.raise_for_status = Mock()
-        mock_patch.return_value = mock_response
-
-        result = create_tool_inventory_block("agent-123", "New inventory content")
-
-        assert "id" in result
-        mock_patch.assert_called_once()
-
-    @patch('webhook_server.memory_manager.find_memory_block')
-    @patch('webhook_server.memory_manager.requests.post')
-    @patch('webhook_server.memory_manager.attach_block_to_agent')
-    def test_create_new_inventory_block(self, mock_attach, mock_post, mock_find):
-        """Test creating a new tool inventory block."""
-        mock_find.return_value = (None, False)
-
-        mock_response = Mock()
-        mock_response.json.return_value = {"id": "block-new", "label": "available_tools"}
-        mock_response.raise_for_status = Mock()
-        mock_post.return_value = mock_response
-
-        mock_attach.return_value = True
-
-        result = create_tool_inventory_block("agent-123", "Tool inventory content")
-
-        assert result["id"] == "block-new"
-        mock_post.assert_called_once()
-        mock_attach.assert_called_once_with("agent-123", "block-new")
-
-    def test_empty_agent_id_returns_empty(self):
-        """Test that empty agent_id returns empty dict."""
-        result = create_tool_inventory_block("", "content")
-        assert result == {}
-
-    def test_empty_content_returns_empty(self):
-        """Test that empty content returns empty dict."""
-        result = create_tool_inventory_block("agent-123", "")
-        assert result == {}
-
-    @patch('webhook_server.memory_manager.find_memory_block')
-    @patch('webhook_server.memory_manager.requests.patch')
-    @patch('webhook_server.memory_manager.attach_block_to_agent')
-    def test_attach_unattached_existing_block(self, mock_attach, mock_patch, mock_find):
-        """Test that existing but unattached block triggers attachment."""
-        existing_block = {
-            "id": "block-unattached",
-            "label": "available_tools",
-            "value": "Old content"
-        }
-        # Block exists but NOT attached
-        mock_find.return_value = (existing_block, False)
-
-        mock_response = Mock()
-        mock_response.json.return_value = {"id": "block-unattached"}
-        mock_response.raise_for_status = Mock()
-        mock_patch.return_value = mock_response
-
-        mock_attach.return_value = True
-
-        result = create_tool_inventory_block("agent-123", "New content")
-
-        mock_attach.assert_called_once_with("agent-123", "block-unattached")
-        mock_patch.assert_called_once()
-
-    @patch('webhook_server.memory_manager.find_memory_block')
-    @patch('webhook_server.memory_manager.requests.patch')
-    def test_inventory_block_uses_snapshot_not_cumulative(self, mock_patch, mock_find):
-        """Test that tool inventory replaces content, not cumulative."""
-        existing_block = {
-            "id": "block-123",
-            "label": "available_tools",
-            "value": "Old tools list"
-        }
-        mock_find.return_value = (existing_block, True)
-
-        mock_response = Mock()
-        mock_response.json.return_value = {"id": "block-123", "value": "New tools"}
-        mock_response.raise_for_status = Mock()
-        mock_patch.return_value = mock_response
-
-        create_tool_inventory_block("agent-123", "Fresh tools list")
-
-        # Check that the value is replaced directly, not cumulative
-        call_args = mock_patch.call_args
-        json_data = call_args[1]['json']
-        assert json_data['value'] == "Fresh tools list"
-
-    @patch('webhook_server.memory_manager.find_memory_block')
-    @patch('webhook_server.memory_manager.requests.post')
-    @patch('webhook_server.memory_manager.attach_block_to_agent')
-    def test_inventory_block_has_correct_metadata(self, mock_attach, mock_post, mock_find):
-        """Test that inventory block has correct metadata."""
-        mock_find.return_value = (None, False)
-
-        mock_response = Mock()
-        mock_response.json.return_value = {"id": "block-123"}
-        mock_response.raise_for_status = Mock()
-        mock_post.return_value = mock_response
-
-        create_tool_inventory_block("agent-123", "Tools content")
-
-        call_args = mock_post.call_args
-        json_data = call_args[1]['json']
-        
-        assert json_data['label'] == "available_tools"
-        assert json_data['metadata']['source'] == "tool_inventory"
-        assert json_data['metadata']['type'] == "snapshot"
+# DEPRECATED: TestCreateToolInventoryBlock - REMOVED
+# Tool inventory blocks no longer needed - agents use find_tools protected tool instead
+#
+# class TestCreateToolInventoryBlock:
+#     """Tests for create_tool_inventory_block function."""
+#
+#     @patch('webhook_server.memory_manager.find_memory_block')
+#     @patch('webhook_server.memory_manager.requests.patch')
+#     def test_update_existing_inventory_block(self, mock_patch, mock_find):
+#         """Test updating an existing tool inventory block."""
+#         existing_block = {
+#             "id": "block-tool-inv",
+#             "label": "available_tools",
+#             "value": "Old inventory"
+#         }
+#         mock_find.return_value = (existing_block, True)
+#
+#         mock_response = Mock()
+#         mock_response.json.return_value = {"id": "block-tool-inv", "value": "New inventory"}
+#         mock_response.raise_for_status = Mock()
+#         mock_patch.return_value = mock_response
+#
+#         result = create_tool_inventory_block("agent-123", "New inventory content")
+#
+#         assert "id" in result
+#         mock_patch.assert_called_once()
+#
+#     @patch('webhook_server.memory_manager.find_memory_block')
+#     @patch('webhook_server.memory_manager.requests.post')
+#     @patch('webhook_server.memory_manager.attach_block_to_agent')
+#     def test_create_new_inventory_block(self, mock_attach, mock_post, mock_find):
+#         """Test creating a new tool inventory block."""
+#         mock_find.return_value = (None, False)
+#
+#         mock_response = Mock()
+#         mock_response.json.return_value = {"id": "block-new", "label": "available_tools"}
+#         mock_response.raise_for_status = Mock()
+#         mock_post.return_value = mock_response
+#
+#         mock_attach.return_value = True
+#
+#         result = create_tool_inventory_block("agent-123", "Tool inventory content")
+#
+#         assert result["id"] == "block-new"
+#         mock_post.assert_called_once()
+#         mock_attach.assert_called_once_with("agent-123", "block-new")
+#
+#     def test_empty_agent_id_returns_empty(self):
+#         """Test that empty agent_id returns empty dict."""
+#         result = create_tool_inventory_block("", "content")
+#         assert result == {}
+#
+#     def test_empty_content_returns_empty(self):
+#         """Test that empty content returns empty dict."""
+#         result = create_tool_inventory_block("agent-123", "")
+#         assert result == {}
+#
+#     @patch('webhook_server.memory_manager.find_memory_block')
+#     @patch('webhook_server.memory_manager.requests.patch')
+#     @patch('webhook_server.memory_manager.attach_block_to_agent')
+#     def test_attach_unattached_existing_block(self, mock_attach, mock_patch, mock_find):
+#         """Test that existing but unattached block triggers attachment."""
+#         existing_block = {
+#             "id": "block-unattached",
+#             "label": "available_tools",
+#             "value": "Old content"
+#         }
+#         # Block exists but NOT attached
+#         mock_find.return_value = (existing_block, False)
+#
+#         mock_response = Mock()
+#         mock_response.json.return_value = {"id": "block-unattached"}
+#         mock_response.raise_for_status = Mock()
+#         mock_patch.return_value = mock_response
+#
+#         mock_attach.return_value = True
+#
+#         result = create_tool_inventory_block("agent-123", "New content")
+#
+#         mock_attach.assert_called_once_with("agent-123", "block-unattached")
+#         mock_patch.assert_called_once()
+#
+#     @patch('webhook_server.memory_manager.find_memory_block')
+#     @patch('webhook_server.memory_manager.requests.patch')
+#     def test_inventory_block_uses_snapshot_not_cumulative(self, mock_patch, mock_find):
+#         """Test that tool inventory replaces content, not cumulative."""
+#         existing_block = {
+#             "id": "block-123",
+#             "label": "available_tools",
+#             "value": "Old tools list"
+#         }
+#         mock_find.return_value = (existing_block, True)
+#
+#         mock_response = Mock()
+#         mock_response.json.return_value = {"id": "block-123", "value": "New tools"}
+#         mock_response.raise_for_status = Mock()
+#         mock_patch.return_value = mock_response
+#
+#         create_tool_inventory_block("agent-123", "Fresh tools list")
+#
+#         # Check that the value is replaced directly, not cumulative
+#         call_args = mock_patch.call_args
+#         json_data = call_args[1]['json']
+#         assert json_data['value'] == "Fresh tools list"
+#
+#     @patch('webhook_server.memory_manager.find_memory_block')
+#     @patch('webhook_server.memory_manager.requests.post')
+#     @patch('webhook_server.memory_manager.attach_block_to_agent')
+#     def test_inventory_block_has_correct_metadata(self, mock_attach, mock_post, mock_find):
+#         """Test that inventory block has correct metadata."""
+#         mock_find.return_value = (None, False)
+#
+#         mock_response = Mock()
+#         mock_response.json.return_value = {"id": "block-123"}
+#         mock_response.raise_for_status = Mock()
+#         mock_post.return_value = mock_response
+#
+#         create_tool_inventory_block("agent-123", "Tools content")
+#
+#         call_args = mock_post.call_args
+#         json_data = call_args[1]['json']
+#         
+#         assert json_data['label'] == "available_tools"
+#         assert json_data['metadata']['source'] == "tool_inventory"
+#         assert json_data['metadata']['type'] == "snapshot"

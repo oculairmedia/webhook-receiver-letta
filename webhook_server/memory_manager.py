@@ -96,72 +96,77 @@ def create_memory_block(block_data: Dict[str, Any], agent_id: Optional[str] = No
     
     return new_block
 
-def create_tool_inventory_block(agent_id: str, content: str) -> Dict[str, Any]:
-    """
-    Create or replace the tool inventory block for an agent.
-    Unlike cumulative context blocks, this is a fresh snapshot each time.
-    
-    Args:
-        agent_id: The agent ID
-        content: The formatted tool inventory content
-        
-    Returns:
-        The created/updated block dict
-    """
-    if not agent_id or not content:
-        print(f"[create_tool_inventory_block] Missing agent_id or content")
-        return {}
-    
-    block_label = "available_tools"
-    
-    # Check if block already exists
-    block_to_use, is_attached = find_memory_block(agent_id, block_label)
-    
-    block_data = {
-        "label": block_label,
-        "value": content,  # Fresh snapshot, no cumulative context
-        "metadata": {"source": "tool_inventory", "type": "snapshot"}
-    }
-    
-    if block_to_use:
-        # Update existing block (replace content entirely)
-        print(f"[create_tool_inventory_block] Updating existing {block_label} block")
-        
-        # If not attached, attach it first
-        if not is_attached:
-            print(f"[create_tool_inventory_block] Block exists but not attached. Auto-attaching...")
-            attach_block_to_agent(agent_id, block_to_use['id'])
-        
-        # Update the block with fresh content (no cumulative logic)
-        update_data = {
-            "value": content,
-            "metadata": block_data["metadata"]
-        }
-        
-        headers = LETTA_API_HEADERS.copy()
-        headers["user_id"] = agent_id
-        
-        update_url = get_api_url(f"blocks/{block_to_use['id']}")
-        update_response = requests.patch(update_url, json=update_data, headers=headers)
-        update_response.raise_for_status()
-        
-        return update_response.json()
-    else:
-        # Create new block
-        print(f"[create_tool_inventory_block] Creating new {block_label} block")
-        
-        create_url = get_api_url("blocks")
-        headers = LETTA_API_HEADERS.copy()
-        headers["user_id"] = agent_id
-        
-        create_response = requests.post(create_url, json=block_data, headers=headers)
-        create_response.raise_for_status()
-        
-        new_block = create_response.json()
-        
-        # Auto-attach to agent
-        if new_block.get('id'):
-            print(f"[create_tool_inventory_block] Auto-attaching new block {new_block['id']}")
-            attach_block_to_agent(agent_id, new_block['id'])
-        
-        return new_block
+
+# DEPRECATED: create_tool_inventory_block() - REMOVED
+# Agents now use the find_tools protected tool to discover available tools dynamically
+# No longer need to maintain an available_tools memory block
+#
+# def create_tool_inventory_block(agent_id: str, content: str) -> Dict[str, Any]:
+#     """
+#     Create or replace the tool inventory block for an agent.
+#     Unlike cumulative context blocks, this is a fresh snapshot each time.
+#     
+#     Args:
+#         agent_id: The agent ID
+#         content: The formatted tool inventory content
+#         
+#     Returns:
+#         The created/updated block dict
+#     """
+#     if not agent_id or not content:
+#         print(f"[create_tool_inventory_block] Missing agent_id or content")
+#         return {}
+#     
+#     block_label = "available_tools"
+#     
+#     # Check if block already exists
+#     block_to_use, is_attached = find_memory_block(agent_id, block_label)
+#     
+#     block_data = {
+#         "label": block_label,
+#         "value": content,  # Fresh snapshot, no cumulative context
+#         "metadata": {"source": "tool_inventory", "type": "snapshot"}
+#     }
+#     
+#     if block_to_use:
+#         # Update existing block (replace content entirely)
+#         print(f"[create_tool_inventory_block] Updating existing {block_label} block")
+#         
+#         # If not attached, attach it first
+#         if not is_attached:
+#             print(f"[create_tool_inventory_block] Block exists but not attached. Auto-attaching...")
+#             attach_block_to_agent(agent_id, block_to_use['id'])
+#         
+#         # Update the block with fresh content (no cumulative logic)
+#         update_data = {
+#             "value": content,
+#             "metadata": block_data["metadata"]
+#         }
+#         
+#         headers = LETTA_API_HEADERS.copy()
+#         headers["user_id"] = agent_id
+#         
+#         update_url = get_api_url(f"blocks/{block_to_use['id']}")
+#         update_response = requests.patch(update_url, json=update_data, headers=headers)
+#         update_response.raise_for_status()
+#         
+#         return update_response.json()
+#     else:
+#         # Create new block
+#         print(f"[create_tool_inventory_block] Creating new {block_label} block")
+#         
+#         create_url = get_api_url("blocks")
+#         headers = LETTA_API_HEADERS.copy()
+#         headers["user_id"] = agent_id
+#         
+#         create_response = requests.post(create_url, json=block_data, headers=headers)
+#         create_response.raise_for_status()
+#         
+#         new_block = create_response.json()
+#         
+#         # Auto-attach to agent
+#         if new_block.get('id'):
+#             print(f"[create_tool_inventory_block] Auto-attaching new block {new_block['id']}")
+#             attach_block_to_agent(agent_id, new_block['id'])
+#         
+#         return new_block

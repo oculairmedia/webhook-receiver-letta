@@ -12,11 +12,11 @@ from urllib3.util.retry import Retry
 from flask import Flask, request, jsonify
 
 from .config import get_api_url
-from .memory_manager import create_memory_block, create_tool_inventory_block
+from .memory_manager import create_memory_block  # create_tool_inventory_block REMOVED - no longer needed
 from .integrations import arxiv_integration, gdelt_integration
 from .context_utils import _build_cumulative_context
 from .agent_registry import register_agent, query_agent_registry, format_agent_context
-from .tool_inventory import build_tool_inventory_block
+# from .tool_inventory import build_tool_inventory_block  # REMOVED - agents use find_tools instead
 
 # Add the parent directory to the path to import tool_manager
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -406,28 +406,30 @@ def webhook_receiver():
             print(f"[AUTO_TOOL_ATTACHMENT] Error during tool attachment: {e}")
             # Don't fail the whole webhook if tool attachment fails
         
-        # Tool inventory memory block - track attached tools
-        try:
-            print(f"[TOOL_INVENTORY] Building tool inventory for agent {agent_id}")
-            inventory_result = build_tool_inventory_block(
-                agent_id=agent_id,
-                prompt=prompt,
-                attachment_result=tool_attachment_data
-            )
-            
-            if inventory_result.get("success"):
-                inventory_content = inventory_result.get("content", "")
-                print(f"[TOOL_INVENTORY] Generated inventory ({len(inventory_content)} chars)")
-                
-                # Create/update the tool inventory memory block
-                inventory_block = create_tool_inventory_block(agent_id, inventory_content)
-                print(f"[TOOL_INVENTORY] Block updated: {inventory_block.get('id')}")
-            else:
-                error = inventory_result.get("error", "Unknown error")
-                print(f"[TOOL_INVENTORY] Failed to build inventory: {error}")
-        except Exception as e:
-            print(f"[TOOL_INVENTORY] Error updating tool inventory: {e}")
-            # Don't fail the whole webhook if inventory update fails
+        # REMOVED: Tool inventory memory block - no longer needed
+        # Agents can now discover available tools via find_tools protected tool
+        # try:
+        #     print(f"[TOOL_INVENTORY] Building tool inventory for agent {agent_id}")
+        #     inventory_result = build_tool_inventory_block(
+        #         agent_id=agent_id,
+        #         prompt=prompt,
+        #         attachment_result=tool_attachment_data
+        #     )
+        #     
+        #     if inventory_result.get("success"):
+        #         inventory_content = inventory_result.get("content", "")
+        #         print(f"[TOOL_INVENTORY] Generated inventory ({len(inventory_content)} chars)")
+        #         
+        #         # Create/update the tool inventory memory block
+        #         inventory_block = create_tool_inventory_block(agent_id, inventory_content)
+        #         print(f"[TOOL_INVENTORY] Block updated: {inventory_block.get('id')}")
+        #     else:
+        #         error = inventory_result.get("error", "Unknown error")
+        #         print(f"[TOOL_INVENTORY] Failed to build inventory: {error}")
+        # except Exception as e:
+        #     print(f"[TOOL_INVENTORY] Error updating tool inventory: {e}")
+        #     # Don't fail the whole webhook if inventory update fails
+
 
         return jsonify({"status": "success", "message": "Context processed and tools attached"}), 200
 
