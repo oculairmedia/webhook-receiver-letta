@@ -338,9 +338,9 @@ def webhook_receiver():
         # Generate context based on the prompt
         context_result = generate_context_from_prompt(prompt, agent_id)
         
-        # Create or update the memory block with the new context
+        # Create or update the memory block with the new context (agent-specific)
         block_data = {
-            "label": "graphiti_context",
+            "label": f"graphiti_context_{agent_id}",
             "value": context_result.get("context", ""),
             "metadata": {"source": "webhook", "event_type": event_type}
         }
