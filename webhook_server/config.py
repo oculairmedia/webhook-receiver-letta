@@ -22,8 +22,12 @@ MAX_CONTEXT_SNIPPET_LENGTH = 6000
 # These tools should always be attached to agents and never detached
 # Format: comma-separated list of tool IDs or tool names
 # Can be set via environment variable PROTECTED_TOOLS
-PROTECTED_TOOLS_DEFAULT = "find_agents"  # Tool names that should always be present
+PROTECTED_TOOLS_DEFAULT = ""  # Empty by default - no forced tools
 PROTECTED_TOOLS = os.environ.get("PROTECTED_TOOLS", PROTECTED_TOOLS_DEFAULT)
+
+# Tool attachment configuration
+TOOL_ATTACHMENT_MIN_SCORE = float(os.environ.get("TOOL_ATTACHMENT_MIN_SCORE", "50.0"))
+TOOL_ATTACHMENT_LIMIT = int(os.environ.get("TOOL_ATTACHMENT_LIMIT", "3"))
 
 def get_api_url(path: str) -> str:
     """Construct API URL following Letta's v1 convention."""

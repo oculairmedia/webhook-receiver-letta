@@ -107,6 +107,62 @@ GRAPHITI_API_URL = os.environ.get("GRAPHITI_URL", "http://192.168.50.90:8003")
 DEFAULT_MAX_NODES = int(os.environ.get("GRAPHITI_MAX_NODES", "8"))
 DEFAULT_MAX_FACTS = int(os.environ.get("GRAPHITI_MAX_FACTS", "20"))
 
+import re
+
+def extract_user_intent(prompt: str) -> str:
+    """
+    Extract the actual user intent from a prompt by stripping metadata prefixes.
+    Handles Matrix message format, OpenCode format, and other wrapper patterns.
+    """
+    if not prompt:
+        return ""
+    
+    cleaned = prompt.strip()
+    
+    # Strip Matrix prefix: [Matrix: @user:domain in Room Name]
+    matrix_pattern = r'^\[Matrix:[^\]]+\]\s*'
+    cleaned = re.sub(matrix_pattern, '', cleaned, flags=re.IGNORECASE)
+    
+    # Strip OpenCode prefix: [MESSAGE FROM OPENCODE USER] or similar
+    opencode_pattern = r'^\[MESSAGE FROM OPENCODE[^\]]*\]\s*'
+    cleaned = re.sub(opencode_pattern, '', cleaned, flags=re.IGNORECASE)
+    
+    # Strip response instruction blocks at the end
+    response_instruction_pattern = r'---\s*RESPONSE INSTRUCTION.*$'
+    cleaned = re.sub(response_instruction_pattern, '', cleaned, flags=re.DOTALL | re.IGNORECASE)
+    
+    return cleaned.strip()
+
+def should_skip_tool_attachment(prompt: str) -> bool:
+    """
+    Determine if tool attachment should be skipped for trivial messages.
+    Returns True if the message is too short/trivial to warrant tool search.
+    """
+    if not prompt:
+        return True
+    
+    cleaned = extract_user_intent(prompt)
+    
+    if len(cleaned) < 10:
+        return True
+    
+    word_count = len(cleaned.split())
+    if word_count < 3:
+        return True
+    
+    trivial_patterns = [
+        r'^(hi|hello|hey|yo|sup|thanks|thank you|ok|okay|sure|yes|no|maybe|cool|nice|great|awesome|good|bye|goodbye|later|cheers)\b',
+        r'^(how are you|what\'?s up|how\'?s it going)\??$',
+        r'^\W*$',  # Only punctuation/whitespace
+    ]
+    
+    cleaned_lower = cleaned.lower()
+    for pattern in trivial_patterns:
+        if re.match(pattern, cleaned_lower):
+            return True
+    
+    return False
+
 def query_graphiti_api(query: str, max_nodes: int = None, max_facts: int = None) -> dict:
     """
     Query the Graphiti search API for context with robust timeout and retry handling.
@@ -373,42 +429,34 @@ def webhook_receiver():
             print(f"[AGENT_DISCOVERY] Error during agent discovery: {e}")
             # Don't fail the whole webhook if agent discovery fails
 
-        # Ensure protected tools are attached before auto-attachment
-        try:
-            print(f"[PROTECTED_TOOLS] Ensuring protected tools for agent {agent_id}")
-            protected_result = ensure_protected_tools(agent_id)
-            if protected_result.get("attached"):
-                print(f"[PROTECTED_TOOLS] Attached missing tools: {protected_result['attached']}")
-            if protected_result.get("failed"):
-                print(f"[PROTECTED_TOOLS] Failed to attach: {protected_result['failed']}")
-        except Exception as e:
-            print(f"[PROTECTED_TOOLS] Error ensuring protected tools: {e}")
-            # Don't fail the whole webhook if protected tools check fails
-
         # Auto tool attachment - find and attach relevant tools based on the prompt
         tool_attachment_data = None
-        try:
-            print(f"[AUTO_TOOL_ATTACHMENT] Searching for relevant tools for prompt: '{prompt[:100]}...'")
-            
-            # Dynamically lookup the find_tools tool ID using the agent's attached tools
-            # Keep existing tools with "*" and add the dynamically found tool ID
-            find_tools_id = get_find_tools_id_with_fallback(agent_id=agent_id)
-            keep_tools_list = ["*", find_tools_id]
-            keep_tools_str = ",".join(keep_tools_list)
-            
-            # Call with return_structured=True to get full API response
-            tool_attachment_data = find_attach_tools(
-                query=prompt,
-                agent_id=agent_id,
-                keep_tools=keep_tools_str,  # Keep existing tools and specific required tool
-                limit=3,  # Limit to 3 new tools to avoid overwhelming
-                min_score=70.0,  # Slightly lower threshold for relevance
-                request_heartbeat=False,
-                return_structured=True  # Get structured data for tool inventory
-            )
-            print(f"[AUTO_TOOL_ATTACHMENT] Tool attachment result: {tool_attachment_data}")
-        except Exception as e:
-            print(f"[AUTO_TOOL_ATTACHMENT] Error during tool attachment: {e}")
+        
+        if should_skip_tool_attachment(prompt):
+            print(f"[AUTO_TOOL_ATTACHMENT] Skipping - trivial message detected")
+        else:
+            try:
+                cleaned_prompt = extract_user_intent(prompt)
+                print(f"[AUTO_TOOL_ATTACHMENT] Searching for tools with cleaned prompt: '{cleaned_prompt[:100]}...'")
+                
+                find_tools_id = get_find_tools_id_with_fallback(agent_id=agent_id)
+                keep_tools_list = ["*", find_tools_id]
+                keep_tools_str = ",".join(keep_tools_list)
+                
+                from .config import TOOL_ATTACHMENT_MIN_SCORE, TOOL_ATTACHMENT_LIMIT
+                
+                tool_attachment_data = find_attach_tools(
+                    query=cleaned_prompt,
+                    agent_id=agent_id,
+                    keep_tools=keep_tools_str,
+                    limit=TOOL_ATTACHMENT_LIMIT,
+                    min_score=TOOL_ATTACHMENT_MIN_SCORE,
+                    request_heartbeat=False,
+                    return_structured=True
+                )
+                print(f"[AUTO_TOOL_ATTACHMENT] Tool attachment result: {tool_attachment_data}")
+            except Exception as e:
+                print(f"[AUTO_TOOL_ATTACHMENT] Error during tool attachment: {e}")
             # Don't fail the whole webhook if tool attachment fails
         
         # REMOVED: Tool inventory memory block - no longer needed
