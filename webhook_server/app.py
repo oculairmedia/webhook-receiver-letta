@@ -109,8 +109,8 @@ DEFAULT_MAX_FACTS = int(os.environ.get("GRAPHITI_MAX_FACTS", "20"))
 
 def query_graphiti_api(query: str, max_nodes: int = None, max_facts: int = None) -> dict:
     """
-    Query the Graphiti unified search API for context with robust timeout and retry handling.
-    Uses the new /search endpoint with proper config structure.
+    Query the Graphiti search API for context with robust timeout and retry handling.
+    Uses separate /search (facts) and /search/nodes endpoints.
     """
     if max_nodes is None:
         max_nodes = DEFAULT_MAX_NODES
@@ -122,7 +122,7 @@ def query_graphiti_api(query: str, max_nodes: int = None, max_facts: int = None)
         graphiti_url = GRAPHITI_API_URL
         if not graphiti_url:
             print(f"[GRAPHITI] Warning: Empty graphiti_url provided, using default")
-            graphiti_url = "http://192.168.50.90:3004"
+            graphiti_url = "http://192.168.50.90:8003"
         
         # Configure session with retry logic
         session = requests.Session()
@@ -135,46 +135,48 @@ def query_graphiti_api(query: str, max_nodes: int = None, max_facts: int = None)
         session.mount("http://", adapter)
         session.mount("https://", adapter)
         
-        # Use the unified search endpoint with proper config
-        search_url = f"{graphiti_url}/search"
+        print(f"[GRAPHITI] Searching with query: '{query[:100]}...'")
         
-        print(f"[GRAPHITI] Searching at {search_url} with query: '{query[:100]}...'")
+        nodes = []
+        edges = []
         
-        # Unified search payload with both node and edge config
-        search_payload = {
-            "query": query,
-            "config": {
-                "edge_config": {
-                    "search_methods": ["fulltext", "similarity"],
-                    "reranker": "rrf",
-                    "bfs_max_depth": 2,
-                    "sim_min_score": 0.1,
-                    "mmr_lambda": 0.5
-                },
-                "node_config": {
-                    "search_methods": ["fulltext", "similarity"],
-                    "reranker": "rrf",
-                    "bfs_max_depth": 2,
-                    "sim_min_score": 0.1,
-                    "mmr_lambda": 0.5,
-                    "centrality_boost_factor": 1.0
-                },
-                "limit": max_nodes,
-                "reranker_min_score": 0.0
-            },
-            "filters": {}
+        search_config = {
+            "search_methods": ["fulltext", "similarity", "hipporag", "bfs"],
+            "reranker": "rrf",
+            "hipporag_max_hops": 2,
+            "hipporag_decay": 0.85,
+            "hipporag_seed_count": 10,
+            "bfs_max_depth": 2,
+            "bfs_beam_width": 50,
+            "bfs_max_expansions": 500,
+            "bfs_max_visited": 1000,
+            "bfs_hub_degree_threshold": 200,
+            "bfs_min_score_cutoff": 0.1
         }
         
-        # Single unified search call
-        print(f"[GRAPHITI] Sending payload: {search_payload}")
-        search_response = session.post(search_url, json=search_payload, timeout=30)
-        print(f"[GRAPHITI] Response status: {search_response.status_code}")
-        search_response.raise_for_status()
-        search_results = search_response.json()
-        print(f"[GRAPHITI] Response keys: {list(search_results.keys())}")
+        try:
+            facts_url = f"{graphiti_url}/search"
+            facts_payload = {"query": query, "max_facts": max_facts, "config": search_config}
+            print(f"[GRAPHITI] Querying facts at {facts_url} with BFS+HippoRAG")
+            facts_response = session.post(facts_url, json=facts_payload, timeout=30)
+            facts_response.raise_for_status()
+            facts_results = facts_response.json()
+            edges = facts_results.get("facts", [])
+            print(f"[GRAPHITI] Got {len(edges)} facts")
+        except Exception as e:
+            print(f"[GRAPHITI] Facts query failed: {e}")
         
-        nodes = search_results.get("nodes", [])
-        edges = search_results.get("edges", [])
+        try:
+            nodes_url = f"{graphiti_url}/search/nodes"
+            nodes_payload = {"query": query, "max_nodes": max_nodes, "config": search_config}
+            print(f"[GRAPHITI] Querying nodes at {nodes_url} with BFS+HippoRAG")
+            nodes_response = session.post(nodes_url, json=nodes_payload, timeout=30)
+            nodes_response.raise_for_status()
+            nodes_results = nodes_response.json()
+            nodes = nodes_results.get("nodes", [])
+            print(f"[GRAPHITI] Got {len(nodes)} nodes")
+        except Exception as e:
+            print(f"[GRAPHITI] Nodes query failed: {e}")
         
         print(f"[GRAPHITI] Results: {len(nodes)} nodes, {len(edges)} edges")
         
@@ -182,18 +184,19 @@ def query_graphiti_api(query: str, max_nodes: int = None, max_facts: int = None)
         
         # Process nodes
         if nodes:
-            print(f"[GRAPHITI] Processing {len(nodes)} nodes")
-            for node in nodes[:max_nodes]:  # Limit to max_nodes
+            nodes_to_process = nodes[:max_nodes]
+            print(f"[GRAPHITI] Processing {len(nodes_to_process)} of {len(nodes)} nodes (max_nodes={max_nodes})")
+            for node in nodes_to_process:
                 node_name = node.get('name', 'N/A')
                 node_summary = node.get('summary', 'N/A')
                 context_parts.append(f"Node: {node_name}\nSummary: {node_summary}")
         
         # Process edges as facts
         if edges:
-            print(f"[GRAPHITI] Processing {len(edges)} edges")
-            # Deduplicate facts by text content
+            edges_to_process = edges[:max_facts]
+            print(f"[GRAPHITI] Processing {len(edges_to_process)} of {len(edges)} edges (max_facts={max_facts})")
             seen_facts = set()
-            for edge in edges[:max_facts]:  # Limit to max_facts
+            for edge in edges_to_process:
                 fact_text = edge.get('fact', edge.get('name', 'N/A'))
                 if fact_text not in seen_facts and fact_text != 'N/A':
                     seen_facts.add(fact_text)
@@ -301,6 +304,8 @@ def webhook_receiver():
                                 agent_id = potential_agent_id
         elif event_type == "stream_started":
             prompt = data.get("prompt")
+            if not prompt and data.get("request") and data["request"].get("body"):
+                prompt = data["request"]["body"].get("input", "")
             if data.get("request") and data["request"].get("path"):
                 path_parts = data["request"]["path"].split("/")
                 if "agents" in path_parts:

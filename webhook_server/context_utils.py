@@ -144,11 +144,11 @@ def _is_content_similar_with_query_awareness(content1: str, content2: str) -> bo
                 print(f"  Treating as different content.")
                 return False
         
-        # If no timestamps found, these are likely different base contexts
-        # and should be treated as different
-        if not timestamps1 and not timestamps2:
-            print(f"[_is_content_similar_with_query_awareness] Different Graphiti base contexts detected (no timestamps).")
-            print(f"  Treating as different content.")
+        # If no timestamps found in content2 (the new content), it's a fresh search result
+        # that should be appended regardless of similarity
+        if not timestamps2:
+            print(f"[_is_content_similar_with_query_awareness] New Graphiti search result (no timestamp in new content).")
+            print(f"  Treating as different content - will append.")
             return False
     
     # For non-arXiv/non-Graphiti content or same queries, use regular similarity logic
