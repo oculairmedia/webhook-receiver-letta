@@ -11,8 +11,8 @@ services:
       - 5005:5005
     environment:
       - FLASK_ENV=production
-      - GRAPHITI_URL=http://192.168.50.90:3004
-      - LETTA_BASE_URL=${LETTA_BASE_URL:-https://letta2.oculair.ca}
+      - GRAPHITI_URL=http://192.168.50.90:8003
+      - LETTA_BASE_URL=${LETTA_BASE_URL:-http://192.168.50.90:8289}
       - LETTA_PASSWORD=${LETTA_PASSWORD}
       - CEREBRAS_API_KEY=${CEREBRAS_API_KEY}
       - GRAPHITI_MAX_NODES=${GRAPHITI_MAX_NODES:-15}
@@ -31,7 +31,6 @@ services:
     networks:
       - letta-network
       - agent-registry-network
-      - letta-proxy_letta-net
   # Weaviate Vector Database for Agent Registry
   weaviate:
     image: semitechnologies/weaviate:1.25.0

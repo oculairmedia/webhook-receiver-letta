@@ -23,7 +23,7 @@ def find_memory_block(agent_id: str, block_label: str) -> Tuple[Optional[dict], 
     try:
         # Stage 1: Check blocks attached to the agent
         agent_blocks_url = get_api_url(f"agents/{agent_id}/core-memory/blocks")
-        request_headers = {**LETTA_API_HEADERS, "user_id": agent_id}
+        request_headers = {**LETTA_API_HEADERS}
         
         agent_blocks_response = requests.get(agent_blocks_url, headers=request_headers, timeout=10)
         agent_blocks_response.raise_for_status()

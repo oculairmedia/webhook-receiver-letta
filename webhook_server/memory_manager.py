@@ -18,8 +18,6 @@ def update_memory_block(block_id: str, block_data: Dict[str, Any], agent_id: Opt
     }
     
     headers = LETTA_API_HEADERS.copy()
-    if agent_id:
-        headers["user_id"] = agent_id
         
     update_url = get_api_url(f"blocks/{block_id}")
     update_response = requests.patch(update_url, json=update_data, headers=headers)
@@ -44,7 +42,6 @@ def attach_block_to_agent(agent_id: str, block_id: str) -> bool:
         
         attach_url = get_api_url(f"agents/{agent_id}/core-memory/blocks/attach/{block_id}")
         headers = LETTA_API_HEADERS.copy()
-        headers["user_id"] = agent_id
         
         # Send empty JSON body to avoid proxy error
         attach_response = requests.patch(attach_url, headers=headers, json={})
@@ -81,8 +78,6 @@ def create_memory_block(block_data: Dict[str, Any], agent_id: Optional[str] = No
     # If no block is found or no agent_id, create a new one
     create_url = get_api_url("blocks")
     headers = LETTA_API_HEADERS.copy()
-    if agent_id:
-        headers["user_id"] = agent_id
 
     create_response = requests.post(create_url, json=block_data, headers=headers)
     create_response.raise_for_status()
