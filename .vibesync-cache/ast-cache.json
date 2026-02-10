@@ -1,0 +1,2525 @@
+{
+  "projectId": "LWBHK",
+  "version": 1,
+  "updatedAt": 1769728181202,
+  "files": {
+    ".opencode/node_modules/@opencode-ai/plugin/dist/example.js": {
+      "path": ".opencode/node_modules/@opencode-ai/plugin/dist/example.js",
+      "contentHash": "75240715b1080f0f6483d4d195d3a3f8",
+      "mtime": 1769370281971.4717,
+      "functions": [
+        {
+          "name": "ExamplePlugin",
+          "signature": "const ExamplePlugin = async (ctx) =>",
+          "parameters": "(ctx)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 2,
+          "end_line": 16,
+          "is_async": true,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181194
+    },
+    ".opencode/node_modules/@opencode-ai/plugin/dist/index.js": {
+      "path": ".opencode/node_modules/@opencode-ai/plugin/dist/index.js",
+      "contentHash": "174f41f401f3bd161dd45b65979789c5",
+      "mtime": 1769370281971.4717,
+      "functions": [],
+      "parsedAt": 1769728181194
+    },
+    ".opencode/node_modules/@opencode-ai/plugin/dist/tool.js": {
+      "path": ".opencode/node_modules/@opencode-ai/plugin/dist/tool.js",
+      "contentHash": "8dd0d71064ee8275b4d231501f442a8c",
+      "mtime": 1769370281971.4717,
+      "functions": [
+        {
+          "name": "tool",
+          "signature": "function tool(input)",
+          "parameters": "(input)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 2,
+          "end_line": 4,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181195
+    },
+    ".opencode/node_modules/@opencode-ai/plugin/dist/shell.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/plugin/dist/shell.d.ts",
+      "contentHash": "f7e830804e4689cfed55419361033a4c",
+      "mtime": 1769370281971.4717,
+      "functions": [],
+      "parsedAt": 1769728181195
+    },
+    ".opencode/node_modules/@opencode-ai/plugin/dist/index.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/plugin/dist/index.d.ts",
+      "contentHash": "d4a257d9bd9fd27fe521a9420698f457",
+      "mtime": 1769370281971.4717,
+      "functions": [],
+      "parsedAt": 1769728181195
+    },
+    ".opencode/node_modules/@opencode-ai/plugin/dist/shell.js": {
+      "path": ".opencode/node_modules/@opencode-ai/plugin/dist/shell.js",
+      "contentHash": "d41d8cd98f00b204e9800998ecf8427e",
+      "mtime": 1769370281971.4717,
+      "functions": [],
+      "parsedAt": 1769728181194
+    },
+    ".opencode/node_modules/@opencode-ai/plugin/dist/tool.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/plugin/dist/tool.d.ts",
+      "contentHash": "b9183010960927bc03ba632ebee32ff6",
+      "mtime": 1769370281971.4717,
+      "functions": [],
+      "parsedAt": 1769728181195
+    },
+    ".opencode/node_modules/@opencode-ai/plugin/dist/example.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/plugin/dist/example.d.ts",
+      "contentHash": "6d8266deceb2389199f5d643c9cc13d1",
+      "mtime": 1769370281971.4717,
+      "functions": [],
+      "parsedAt": 1769728181194
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/server.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/server.d.ts",
+      "contentHash": "6021a4edb5ff72f596b5e0fb8915f34f",
+      "mtime": 1769370282079.4744,
+      "functions": [],
+      "parsedAt": 1769728181202
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/index.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/index.js",
+      "contentHash": "eae938215e1f76795db926f070bcf340",
+      "mtime": 1769370282079.4744,
+      "functions": [
+        {
+          "name": "createOpencode",
+          "signature": "async function createOpencode(options)",
+          "parameters": "(options)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 5,
+          "end_line": 16,
+          "is_async": true,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181198
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/client.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/client.d.ts",
+      "contentHash": "b1a4618694404cddc87bbccfc9ddf242",
+      "mtime": 1769370282075.474,
+      "functions": [],
+      "parsedAt": 1769728181202
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/client.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/client.d.ts",
+      "contentHash": "b1a4618694404cddc87bbccfc9ddf242",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181195
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/server.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/server.d.ts",
+      "contentHash": "6021a4edb5ff72f596b5e0fb8915f34f",
+      "mtime": 1769370282075.474,
+      "functions": [],
+      "parsedAt": 1769728181195
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/sdk.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/sdk.gen.js",
+      "contentHash": "aed89a4fb118a04abac0fe14148c8c0c",
+      "mtime": 1769370282079.4744,
+      "functions": [],
+      "parsedAt": 1769728181201
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client.gen.js",
+      "contentHash": "8b999c2fb6925159b1d30dbc6c1526bb",
+      "mtime": 1769370282075.474,
+      "functions": [],
+      "parsedAt": 1769728181201
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/pathSerializer.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/pathSerializer.gen.d.ts",
+      "contentHash": "a0720b29da52cca29e0b71d24d9addb2",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181197
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/serverSentEvents.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/serverSentEvents.gen.d.ts",
+      "contentHash": "b0a8e2ab3b90612e10844e8d75c8fdb0",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181196
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/types.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/types.gen.d.ts",
+      "contentHash": "dd8d43372beefe37f56a7f080565df05",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181196
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client/index.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client/index.js",
+      "contentHash": "5ed02ae8f37e9251c2675c92087b6ef9",
+      "mtime": 1769370282075.474,
+      "functions": [],
+      "parsedAt": 1769728181199
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/types.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/types.gen.js",
+      "contentHash": "ce12ac793548b0b0239dc748e9fb7a83",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181197
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client/types.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client/types.gen.d.ts",
+      "contentHash": "b3db71ef9130712d9f86b8a577d7a549",
+      "mtime": 1769370282075.474,
+      "functions": [],
+      "parsedAt": 1769728181199
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/auth.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/auth.gen.js",
+      "contentHash": "23337d103a50e2ca75070ec76658d953",
+      "mtime": 1769370282071.474,
+      "functions": [
+        {
+          "name": "getAuthToken",
+          "signature": "const getAuthToken = async (auth, callback) =>",
+          "parameters": "(auth, callback)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 2,
+          "end_line": 14,
+          "is_async": true,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181197
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client/types.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client/types.gen.js",
+      "contentHash": "ce12ac793548b0b0239dc748e9fb7a83",
+      "mtime": 1769370282075.474,
+      "functions": [],
+      "parsedAt": 1769728181199
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/bodySerializer.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/bodySerializer.gen.d.ts",
+      "contentHash": "acf019046d9b754b4abc1b6ad9530d35",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181197
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/bodySerializer.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/bodySerializer.gen.js",
+      "contentHash": "6971a4588d46b3e0e1bc09f8f89e5683",
+      "mtime": 1769370282071.474,
+      "functions": [
+        {
+          "name": "serializeFormDataPair",
+          "signature": "const serializeFormDataPair = (data, key, value) =>",
+          "parameters": "(data, key, value)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 2,
+          "end_line": 12,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "serializeUrlSearchParamsPair",
+          "signature": "const serializeUrlSearchParamsPair = (data, key, value) =>",
+          "parameters": "(data, key, value)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 13,
+          "end_line": 20,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181197
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client/client.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client/client.gen.d.ts",
+      "contentHash": "8b5d36d06bfe2a5ba53451a190c27085",
+      "mtime": 1769370282075.474,
+      "functions": [],
+      "parsedAt": 1769728181198
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/utils.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/utils.gen.js",
+      "contentHash": "dfba6221cbac7651aee75fc9f5a12905",
+      "mtime": 1769370282071.474,
+      "functions": [
+        {
+          "name": "defaultPathSerializer",
+          "signature": "const defaultPathSerializer = ({ path, url: _url }) =>",
+          "parameters": "({ path, url: _url })",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 4,
+          "end_line": 54,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "getUrl",
+          "signature": "const getUrl = ({ baseUrl, path, query, querySerializer, url: _url, }) =>",
+          "parameters": "({ baseUrl, path, query, querySerializer, url: _url, })",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 55,
+          "end_line": 69,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181197
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client/client.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client/client.gen.js",
+      "contentHash": "d7f9fa8e04fe2df2fd19d2f8621f6fe6",
+      "mtime": 1769370282075.474,
+      "functions": [
+        {
+          "name": "createClient",
+          "signature": "const createClient = (config = {}) =>",
+          "parameters": "(config = {})",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 5,
+          "end_line": 232,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181198
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/params.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/params.gen.d.ts",
+      "contentHash": "f89b56a405d3893c5601eb49a313434a",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181197
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client/utils.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client/utils.gen.js",
+      "contentHash": "1e007a6ca700df02db7c06ab31348a80",
+      "mtime": 1769370282075.474,
+      "functions": [
+        {
+          "name": "createQuerySerializer",
+          "signature": "const createQuerySerializer = ({ parameters = {}, ...args } = {}) =>",
+          "parameters": "({ parameters = {}, ...args } = {})",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 6,
+          "end_line": 54,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "getParseAs",
+          "signature": "const getParseAs = (contentType) =>",
+          "parameters": "(contentType)",
+          "return_type": null,
+          "docstring": "/**\n * Infers parseAs value from provided Content-Type header.\n */",
+          "decorators": [],
+          "start_line": 58,
+          "end_line": 81,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "checkForExistence",
+          "signature": "const checkForExistence = (options, name) =>",
+          "parameters": "(options, name)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 82,
+          "end_line": 90,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "setAuthParams",
+          "signature": "const setAuthParams = async ({ security, ...options }) =>",
+          "parameters": "({ security, ...options })",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 91,
+          "end_line": 117,
+          "is_async": true,
+          "is_generator": false
+        },
+        {
+          "name": "buildUrl",
+          "signature": "const buildUrl = (options) =>",
+          "parameters": "(options)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 118,
+          "end_line": 126,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "mergeConfigs",
+          "signature": "const mergeConfigs = (a, b) =>",
+          "parameters": "(a, b)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 127,
+          "end_line": 134,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "headersEntries",
+          "signature": "const headersEntries = (headers) =>",
+          "parameters": "(headers)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 135,
+          "end_line": 141,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "mergeHeaders",
+          "signature": "const mergeHeaders = (...headers) =>",
+          "parameters": "(...headers)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 142,
+          "end_line": 166,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "createInterceptors",
+          "signature": "const createInterceptors = () =>",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 201,
+          "end_line": 205,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "createConfig",
+          "signature": "const createConfig = (override = {}) =>",
+          "parameters": "(override = {})",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 220,
+          "end_line": 226,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181199
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/serverSentEvents.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/serverSentEvents.gen.js",
+      "contentHash": "62b5810889666be7f714a0dafd1f6515",
+      "mtime": 1769370282071.474,
+      "functions": [
+        {
+          "name": "createSseClient",
+          "signature": "const createSseClient = ({ onSseError, onSseEvent, responseTransformer, responseValidator, sseDefaultRetryDelay, sseMaxRetryAttempts, sseMaxRetryDelay, sseSleepFn, url, ...options }) =>",
+          "parameters": "({ onSseError, onSseEvent, responseTransformer, responseValidator, sseDefaultRetryDelay, sseMaxRetryAttempts, sseMaxRetryDelay, sseSleepFn, url, ...options })",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 2,
+          "end_line": 117,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181196
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client/utils.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client/utils.gen.d.ts",
+      "contentHash": "0e8874dd90e43a8cf178a54756460a5d",
+      "mtime": 1769370282075.474,
+      "functions": [],
+      "parsedAt": 1769728181199
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/auth.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/auth.gen.d.ts",
+      "contentHash": "303b451268b199583a965cd91e0a176d",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181197
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/params.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/params.gen.js",
+      "contentHash": "175d779a4beda1ae8cf62ec324867aba",
+      "mtime": 1769370282071.474,
+      "functions": [
+        {
+          "name": "buildKeyMap",
+          "signature": "const buildKeyMap = (fields, map) =>",
+          "parameters": "(fields, map)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 9,
+          "end_line": 27,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "stripEmptySlots",
+          "signature": "const stripEmptySlots = (params) =>",
+          "parameters": "(params)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 28,
+          "end_line": 34,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "buildClientParams",
+          "signature": "const buildClientParams = (args, fields) =>",
+          "parameters": "(args, fields)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 35,
+          "end_line": 89,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181197
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client/index.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client/index.d.ts",
+      "contentHash": "b75bdae6e55364d4ce9c7fd24c702e6c",
+      "mtime": 1769370282075.474,
+      "functions": [],
+      "parsedAt": 1769728181199
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/pathSerializer.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/pathSerializer.gen.js",
+      "contentHash": "c1469be5f386eba283c57777e5fcb445",
+      "mtime": 1769370282071.474,
+      "functions": [
+        {
+          "name": "separatorArrayExplode",
+          "signature": "const separatorArrayExplode = (style) =>",
+          "parameters": "(style)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 2,
+          "end_line": 13,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "separatorArrayNoExplode",
+          "signature": "const separatorArrayNoExplode = (style) =>",
+          "parameters": "(style)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 14,
+          "end_line": 25,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "separatorObjectExplode",
+          "signature": "const separatorObjectExplode = (style) =>",
+          "parameters": "(style)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 26,
+          "end_line": 37,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "serializeArrayParam",
+          "signature": "const serializeArrayParam = ({ allowReserved, explode, name, style, value, }) =>",
+          "parameters": "({ allowReserved, explode, name, style, value, })",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 38,
+          "end_line": 66,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "serializePrimitiveParam",
+          "signature": "const serializePrimitiveParam = ({ allowReserved, name, value }) =>",
+          "parameters": "({ allowReserved, name, value })",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 67,
+          "end_line": 75,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "rializeObjectParam =",
+          "signature": "const rializeObjectParam = =  allowReserved, explode, name, style, value, valueOnly, }) = =>",
+          "parameters": " allowReserved, explode, name, style, value, valueOnly, }) =",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 76,
+          "end_line": 106,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181197
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/types.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/types.gen.js",
+      "contentHash": "ce12ac793548b0b0239dc748e9fb7a83",
+      "mtime": 1769370282079.4744,
+      "functions": [],
+      "parsedAt": 1769728181199
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/utils.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/core/utils.gen.d.ts",
+      "contentHash": "36a41bd931325d8b0d2809c350c76819",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181197
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/sdk.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/sdk.gen.d.ts",
+      "contentHash": "ab6f67acc7eb55467dc51ade5ef50ab7",
+      "mtime": 1769370282079.4744,
+      "functions": [],
+      "parsedAt": 1769728181199
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/sdk.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/sdk.gen.d.ts",
+      "contentHash": "e2e77407414c62c440448af27848be74",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181198
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client.gen.js",
+      "contentHash": "3cb8b4ecd8af0b1279e6f861643ec553",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181196
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/types.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/types.gen.js",
+      "contentHash": "ce12ac793548b0b0239dc748e9fb7a83",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181196
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/types.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/types.gen.d.ts",
+      "contentHash": "f752769f709ba6f85175beb15f057f53",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181198
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/auth.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/auth.gen.js",
+      "contentHash": "23337d103a50e2ca75070ec76658d953",
+      "mtime": 1769370282075.474,
+      "functions": [
+        {
+          "name": "getAuthToken",
+          "signature": "const getAuthToken = async (auth, callback) =>",
+          "parameters": "(auth, callback)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 2,
+          "end_line": 14,
+          "is_async": true,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181201
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client/utils.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client/utils.gen.js",
+      "contentHash": "8ec1f4bb25fd2d90bda1f918fbd8c322",
+      "mtime": 1769370282071.474,
+      "functions": [
+        {
+          "name": "createQuerySerializer",
+          "signature": "const createQuerySerializer = ({ allowReserved, array, object } = {}) =>",
+          "parameters": "({ allowReserved, array, object } = {})",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 6,
+          "end_line": 53,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "getParseAs",
+          "signature": "const getParseAs = (contentType) =>",
+          "parameters": "(contentType)",
+          "return_type": null,
+          "docstring": "/**\n * Infers parseAs value from provided Content-Type header.\n */",
+          "decorators": [],
+          "start_line": 57,
+          "end_line": 80,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "checkForExistence",
+          "signature": "const checkForExistence = (options, name) =>",
+          "parameters": "(options, name)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 81,
+          "end_line": 89,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "setAuthParams",
+          "signature": "const setAuthParams = async ({ security, ...options }) =>",
+          "parameters": "({ security, ...options })",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 90,
+          "end_line": 116,
+          "is_async": true,
+          "is_generator": false
+        },
+        {
+          "name": "buildUrl",
+          "signature": "const buildUrl = (options) =>",
+          "parameters": "(options)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 117,
+          "end_line": 125,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "mergeConfigs",
+          "signature": "const mergeConfigs = (a, b) =>",
+          "parameters": "(a, b)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 126,
+          "end_line": 133,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "mergeHeaders",
+          "signature": "const mergeHeaders = (...headers) =>",
+          "parameters": "(...headers)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 134,
+          "end_line": 158,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "createInterceptors",
+          "signature": "const createInterceptors = () =>",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 201,
+          "end_line": 205,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "createConfig",
+          "signature": "const createConfig = (override = {}) =>",
+          "parameters": "(override = {})",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 220,
+          "end_line": 226,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181196
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/types.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/types.gen.d.ts",
+      "contentHash": "d50a9d4b20be4e8e9fa7bd4c0b886c06",
+      "mtime": 1769370282075.474,
+      "functions": [],
+      "parsedAt": 1769728181200
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client/client.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client/client.gen.d.ts",
+      "contentHash": "8b5d36d06bfe2a5ba53451a190c27085",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181196
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/bodySerializer.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/bodySerializer.gen.d.ts",
+      "contentHash": "9849da2d817e0f76ca0a5fdbb377c6e1",
+      "mtime": 1769370282075.474,
+      "functions": [],
+      "parsedAt": 1769728181200
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/serverSentEvents.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/serverSentEvents.gen.d.ts",
+      "contentHash": "e772a052360dc97fdf512250c1ca0484",
+      "mtime": 1769370282075.474,
+      "functions": [],
+      "parsedAt": 1769728181201
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client/index.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client/index.js",
+      "contentHash": "47174e270144cc6e4c6a7d9a984611d7",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181196
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client/types.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client/types.gen.d.ts",
+      "contentHash": "a6da52e9f853d82627335ba2c031e3f2",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181196
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/params.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/params.gen.js",
+      "contentHash": "c2072c7203d6b53f2461d338302d5d62",
+      "mtime": 1769370282075.474,
+      "functions": [
+        {
+          "name": "buildKeyMap",
+          "signature": "const buildKeyMap = (fields, map) =>",
+          "parameters": "(fields, map)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 9,
+          "end_line": 32,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "stripEmptySlots",
+          "signature": "const stripEmptySlots = (params) =>",
+          "parameters": "(params)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 33,
+          "end_line": 39,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "buildClientParams",
+          "signature": "const buildClientParams = (args, fields) =>",
+          "parameters": "(args, fields)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 40,
+          "end_line": 102,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181200
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client/client.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client/client.gen.js",
+      "contentHash": "fdf90f1fa29dc249a94724cb7f503c01",
+      "mtime": 1769370282071.474,
+      "functions": [
+        {
+          "name": "createClient",
+          "signature": "const createClient = (config = {}) =>",
+          "parameters": "(config = {})",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 4,
+          "end_line": 165,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181195
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client/utils.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client/utils.gen.d.ts",
+      "contentHash": "35deb03727ba77d65a67fad05a394b05",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181196
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/auth.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/auth.gen.d.ts",
+      "contentHash": "303b451268b199583a965cd91e0a176d",
+      "mtime": 1769370282075.474,
+      "functions": [],
+      "parsedAt": 1769728181200
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client/types.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client/types.gen.js",
+      "contentHash": "ce12ac793548b0b0239dc748e9fb7a83",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181196
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/utils.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/utils.gen.js",
+      "contentHash": "6b0e902a13f0b1efb62cbd3f13042b47",
+      "mtime": 1769370282079.4744,
+      "functions": [
+        {
+          "name": "defaultPathSerializer",
+          "signature": "const defaultPathSerializer = ({ path, url: _url }) =>",
+          "parameters": "({ path, url: _url })",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 4,
+          "end_line": 54,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "getUrl",
+          "signature": "const getUrl = ({ baseUrl, path, query, querySerializer, url: _url, }) =>",
+          "parameters": "({ baseUrl, path, query, querySerializer, url: _url, })",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 55,
+          "end_line": 69,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "getValidRequestBody",
+          "signature": "function getValidRequestBody(options)",
+          "parameters": "(options)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 70,
+          "end_line": 87,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181200
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client/index.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client/index.d.ts",
+      "contentHash": "8d2e94927abd8102d2114dcfe9106f5a",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181196
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/params.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/params.gen.d.ts",
+      "contentHash": "20acd7019ff6025f7204dfe5046734d7",
+      "mtime": 1769370282075.474,
+      "functions": [],
+      "parsedAt": 1769728181200
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/pathSerializer.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/pathSerializer.gen.js",
+      "contentHash": "c1469be5f386eba283c57777e5fcb445",
+      "mtime": 1769370282075.474,
+      "functions": [
+        {
+          "name": "separatorArrayExplode",
+          "signature": "const separatorArrayExplode = (style) =>",
+          "parameters": "(style)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 2,
+          "end_line": 13,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "separatorArrayNoExplode",
+          "signature": "const separatorArrayNoExplode = (style) =>",
+          "parameters": "(style)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 14,
+          "end_line": 25,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "separatorObjectExplode",
+          "signature": "const separatorObjectExplode = (style) =>",
+          "parameters": "(style)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 26,
+          "end_line": 37,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "serializeArrayParam",
+          "signature": "const serializeArrayParam = ({ allowReserved, explode, name, style, value, }) =>",
+          "parameters": "({ allowReserved, explode, name, style, value, })",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 38,
+          "end_line": 66,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "serializePrimitiveParam",
+          "signature": "const serializePrimitiveParam = ({ allowReserved, name, value }) =>",
+          "parameters": "({ allowReserved, name, value })",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 67,
+          "end_line": 75,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "rializeObjectParam =",
+          "signature": "const rializeObjectParam = =  allowReserved, explode, name, style, value, valueOnly, }) = =>",
+          "parameters": " allowReserved, explode, name, style, value, valueOnly, }) =",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 76,
+          "end_line": 106,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181200
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/pathSerializer.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/pathSerializer.gen.d.ts",
+      "contentHash": "a0720b29da52cca29e0b71d24d9addb2",
+      "mtime": 1769370282075.474,
+      "functions": [],
+      "parsedAt": 1769728181200
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/client.gen.d.ts",
+      "contentHash": "53a452abe901863442e84b1fca50149e",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181196
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/types.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/types.gen.js",
+      "contentHash": "ce12ac793548b0b0239dc748e9fb7a83",
+      "mtime": 1769370282079.4744,
+      "functions": [],
+      "parsedAt": 1769728181200
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/gen/sdk.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/gen/sdk.gen.js",
+      "contentHash": "76905a059075c3f5940286e33a59df06",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181198
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/queryKeySerializer.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/queryKeySerializer.gen.d.ts",
+      "contentHash": "62dbea11cb602b05ebcc7da11f33d35d",
+      "mtime": 1769370282075.474,
+      "functions": [],
+      "parsedAt": 1769728181200
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/queryKeySerializer.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/queryKeySerializer.gen.js",
+      "contentHash": "556c5e2014d755d44ab77b9e2d12715b",
+      "mtime": 1769370282075.474,
+      "functions": [
+        {
+          "name": "queryKeyJsonReplacer",
+          "signature": "const queryKeyJsonReplacer = (_key, value) =>",
+          "parameters": "(_key, value)",
+          "return_type": null,
+          "docstring": "/**\n * Replacer that converts non-JSON values (bigint, Date, etc.) to safe substitutes.\n */",
+          "decorators": [],
+          "start_line": 5,
+          "end_line": 16,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "stringifyToJsonValue",
+          "signature": "const stringifyToJsonValue = (input) =>",
+          "parameters": "(input)",
+          "return_type": null,
+          "docstring": "/**\n * Safely stringifies a value and parses it back into a JsonValue.\n */",
+          "decorators": [],
+          "start_line": 20,
+          "end_line": 31,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "isPlainObject",
+          "signature": "const isPlainObject = (value) =>",
+          "parameters": "(value)",
+          "return_type": null,
+          "docstring": "/**\n * Detects plain objects (including objects with a null prototype).\n */",
+          "decorators": [],
+          "start_line": 35,
+          "end_line": 41,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "serializeSearchParams",
+          "signature": "const serializeSearchParams = (params) =>",
+          "parameters": "(params)",
+          "return_type": null,
+          "docstring": "/**\n * Turns URLSearchParams into a sorted JSON object for deterministic keys.\n */",
+          "decorators": [],
+          "start_line": 45,
+          "end_line": 63,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "serializeQueryKeyValue",
+          "signature": "const serializeQueryKeyValue = (value) =>",
+          "parameters": "(value)",
+          "return_type": null,
+          "docstring": "/**\n * Normalizes any accepted value into a JSON-friendly shape for query keys.\n */",
+          "decorators": [],
+          "start_line": 67,
+          "end_line": 93,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181200
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/serverSentEvents.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/serverSentEvents.gen.js",
+      "contentHash": "8aeee1e116ab1bd76b0130368e27f92a",
+      "mtime": 1769370282075.474,
+      "functions": [
+        {
+          "name": "createSseClient",
+          "signature": "const createSseClient = ({ onRequest, onSseError, onSseEvent, responseTransformer, responseValidator, sseDefaultRetryDelay, sseMaxRetryAttempts, sseMaxRetryDelay, sseSleepFn, url, ...options }) =>",
+          "parameters": "({ onRequest, onSseError, onSseEvent, responseTransformer, responseValidator, sseDefaultRetryDelay, sseMaxRetryAttempts, sseMaxRetryDelay, sseSleepFn, url, ...options })",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 2,
+          "end_line": 133,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181201
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/bodySerializer.gen.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/bodySerializer.gen.js",
+      "contentHash": "6971a4588d46b3e0e1bc09f8f89e5683",
+      "mtime": 1769370282075.474,
+      "functions": [
+        {
+          "name": "serializeFormDataPair",
+          "signature": "const serializeFormDataPair = (data, key, value) =>",
+          "parameters": "(data, key, value)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 2,
+          "end_line": 12,
+          "is_async": false,
+          "is_generator": false
+        },
+        {
+          "name": "serializeUrlSearchParamsPair",
+          "signature": "const serializeUrlSearchParamsPair = (data, key, value) =>",
+          "parameters": "(data, key, value)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 13,
+          "end_line": 20,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181200
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/utils.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/core/utils.gen.d.ts",
+      "contentHash": "8900798c72ba7b4cc3f55c79e03096af",
+      "mtime": 1769370282079.4744,
+      "functions": [],
+      "parsedAt": 1769728181200
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/types.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/types.gen.d.ts",
+      "contentHash": "c8d4404738e33c169259f8baceb00c15",
+      "mtime": 1769370282079.4744,
+      "functions": [],
+      "parsedAt": 1769728181202
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/index.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/index.d.ts",
+      "contentHash": "383290ee700c57de3a60cc50aec52df3",
+      "mtime": 1769370282071.474,
+      "functions": [],
+      "parsedAt": 1769728181195
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client.gen.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/gen/client.gen.d.ts",
+      "contentHash": "d59cfa03b0eed6a7b9d363244e34532e",
+      "mtime": 1769370282075.474,
+      "functions": [],
+      "parsedAt": 1769728181199
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/index.d.ts": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/index.d.ts",
+      "contentHash": "383290ee700c57de3a60cc50aec52df3",
+      "mtime": 1769370282079.4744,
+      "functions": [],
+      "parsedAt": 1769728181198
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/server.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/server.js",
+      "contentHash": "3a3d332f303eda9f7accead0ab2e01ef",
+      "mtime": 1769370282079.4744,
+      "functions": [
+        {
+          "name": "createOpencodeServer",
+          "signature": "async function createOpencodeServer(options)",
+          "parameters": "(options)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 2,
+          "end_line": 66,
+          "is_async": true,
+          "is_generator": false
+        },
+        {
+          "name": "createOpencodeTui",
+          "signature": "function createOpencodeTui(options)",
+          "parameters": "(options)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 67,
+          "end_line": 94,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181198
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/v2/client.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/v2/client.js",
+      "contentHash": "ca99ba2d38140de988b51d9c7c3e6e6b",
+      "mtime": 1769370282075.474,
+      "functions": [
+        {
+          "name": "createOpencodeClient",
+          "signature": "function createOpencodeClient(config)",
+          "parameters": "(config)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 5,
+          "end_line": 27,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181198
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/index.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/index.js",
+      "contentHash": "eae938215e1f76795db926f070bcf340",
+      "mtime": 1769370282075.474,
+      "functions": [
+        {
+          "name": "createOpencode",
+          "signature": "async function createOpencode(options)",
+          "parameters": "(options)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 5,
+          "end_line": 16,
+          "is_async": true,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181195
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/server.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/server.js",
+      "contentHash": "3a3d332f303eda9f7accead0ab2e01ef",
+      "mtime": 1769370282075.474,
+      "functions": [
+        {
+          "name": "createOpencodeServer",
+          "signature": "async function createOpencodeServer(options)",
+          "parameters": "(options)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 2,
+          "end_line": 66,
+          "is_async": true,
+          "is_generator": false
+        },
+        {
+          "name": "createOpencodeTui",
+          "signature": "function createOpencodeTui(options)",
+          "parameters": "(options)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 67,
+          "end_line": 94,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181195
+    },
+    ".opencode/node_modules/@opencode-ai/sdk/dist/client.js": {
+      "path": ".opencode/node_modules/@opencode-ai/sdk/dist/client.js",
+      "contentHash": "15e34ba03e2dea431e8b781155f916df",
+      "mtime": 1769370282071.474,
+      "functions": [
+        {
+          "name": "createOpencodeClient",
+          "signature": "function createOpencodeClient(config)",
+          "parameters": "(config)",
+          "return_type": null,
+          "docstring": null,
+          "decorators": [],
+          "start_line": 5,
+          "end_line": 25,
+          "is_async": false,
+          "is_generator": false
+        }
+      ],
+      "parsedAt": 1769728181195
+    },
+    "agent_registry_service/app.py": {
+      "path": "agent_registry_service/app.py",
+      "contentHash": "34526a36a0eef0ba747d9ae0766074c2",
+      "mtime": 1767413683646.0286,
+      "functions": [
+        {
+          "name": "init_weaviate_client",
+          "signature": "def init_weaviate_client()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Initialize Weaviate client and create Agent collection if needed.",
+          "decorators": [],
+          "start_line": 42,
+          "end_line": 82,
+          "is_async": false
+        },
+        {
+          "name": "init_embedding_provider",
+          "signature": "def init_embedding_provider()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Initialize Ollama embedding provider.",
+          "decorators": [],
+          "start_line": 85,
+          "end_line": 101,
+          "is_async": false
+        },
+        {
+          "name": "generate_embedding",
+          "signature": "def generate_embedding(text: str) -> List[float]",
+          "parameters": "(text: str)",
+          "return_type": "List[float]",
+          "docstring": "Generate embedding vector for text.",
+          "decorators": [],
+          "start_line": 104,
+          "end_line": 109,
+          "is_async": false
+        },
+        {
+          "name": "format_agent_for_response",
+          "signature": "def format_agent_for_response(agent_obj) -> Dict[str, Any]",
+          "parameters": "(agent_obj)",
+          "return_type": "Dict[str, Any]",
+          "docstring": "Format Weaviate agent object for API response.",
+          "decorators": [],
+          "start_line": 112,
+          "end_line": 124,
+          "is_async": false
+        },
+        {
+          "name": "health_check",
+          "signature": "def health_check()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Health check endpoint.",
+          "decorators": [
+            "@app.route(\"/health\", methods=[\"GET\"])"
+          ],
+          "start_line": 128,
+          "end_line": 139,
+          "is_async": false
+        },
+        {
+          "name": "register_agent",
+          "signature": "def register_agent()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Register a new agent in the registry.\n    \n    Request body:\n    {\n        \"agent_id\": \"agent-xxx\",\n        \"name\": \"Agent Name\",\n        \"description\": \"Agent description\",\n        \"capabilities\": [\"capability1\", \"capability2\"],\n        \"status\": \"active\",\n        \"tags\": [],\n        \"created_at\": \"ISO timestamp\",\n        \"updated_at\": \"ISO timestamp\"\n    }",
+          "decorators": [
+            "@app.route(\"/api/v1/agents/register\", methods=[\"POST\"])"
+          ],
+          "start_line": 143,
+          "end_line": 217,
+          "is_async": false
+        },
+        {
+          "name": "search_agents",
+          "signature": "def search_agents()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Search for agents using semantic search.\n    \n    Query parameters:\n    - query: Search query text\n    - limit: Maximum number of results (default: 10)\n    - min_score: Minimum similarity score 0-1 (default: 0.5)",
+          "decorators": [
+            "@app.route(\"/api/v1/agents/search\", methods=[\"GET\"])"
+          ],
+          "start_line": 221,
+          "end_line": 272,
+          "is_async": false
+        },
+        {
+          "name": "get_agent",
+          "signature": "def get_agent(agent_id: str)",
+          "parameters": "(agent_id: str)",
+          "return_type": null,
+          "docstring": "Get details for a specific agent.",
+          "decorators": [
+            "@app.route(\"/api/v1/agents/<agent_id>\", methods=[\"GET\"])"
+          ],
+          "start_line": 276,
+          "end_line": 297,
+          "is_async": false
+        },
+        {
+          "name": "update_agent_status",
+          "signature": "def update_agent_status(agent_id: str)",
+          "parameters": "(agent_id: str)",
+          "return_type": null,
+          "docstring": "Update agent status.\n    \n    Request body:\n    {\n        \"status\": \"active\" | \"inactive\" | \"offline\"\n    }",
+          "decorators": [
+            "@app.route(\"/api/v1/agents/<agent_id>/status\", methods=[\"PUT\"])"
+          ],
+          "start_line": 301,
+          "end_line": 350,
+          "is_async": false
+        },
+        {
+          "name": "delete_agent",
+          "signature": "def delete_agent(agent_id: str)",
+          "parameters": "(agent_id: str)",
+          "return_type": null,
+          "docstring": "Deregister an agent from the registry.",
+          "decorators": [
+            "@app.route(\"/api/v1/agents/<agent_id>\", methods=[\"DELETE\"])"
+          ],
+          "start_line": 354,
+          "end_line": 382,
+          "is_async": false
+        }
+      ],
+      "parsedAt": 1769590055543
+    },
+    "agent_registry_service/mcp_server.py": {
+      "path": "agent_registry_service/mcp_server.py",
+      "contentHash": "28863ef364929c19011ed1dc5707043a",
+      "mtime": 1767413683646.0286,
+      "functions": [
+        {
+          "name": "find_agents",
+          "signature": "def find_agents(\n    query: str,\n    limit: int = 10,\n    min_score: float = 0.3\n) -> str",
+          "parameters": "(\n    query: str,\n    limit: int = 10,\n    min_score: float = 0.3\n)",
+          "return_type": "str",
+          "docstring": "Search for relevant agents in the agent registry based on a query.\n    \n    Args:\n        query: Search query describing what kind of agent you're looking for \n               (e.g., 'machine learning expert', 'database administrator', 'content writer')\n        limit: Maximum number of agents to return (default: 10, max: 50)\n        min_score: Minimum relevance score 0.0-1.0 (default: 0.3)\n    \n    Returns:\n        Formatted string with agent details including IDs, descriptions, and capabilities",
+          "decorators": [
+            "@mcp.tool(\n    name=\"find_agents\",\n    description=\"Search for relevant agents in the agent registry to find collaborators or specialists. Returns a list of agents with their IDs, capabilities, and relevance scores.\"\n)"
+          ],
+          "start_line": 46,
+          "end_line": 146,
+          "is_async": true
+        },
+        {
+          "name": "n() ",
+          "signature": "def n() -> -> e:\n ",
+          "parameters": "->",
+          "return_type": "e:\n ",
+          "docstring": "Entrypoint for running the FastMCP server over HTTP transport.\"\"\"",
+          "decorators": [],
+          "start_line": 170,
+          "end_line": 191,
+          "is_async": false
+        }
+      ],
+      "parsedAt": 1769590055543
+    },
+    "agent_registry_service/sync_service.py": {
+      "path": "agent_registry_service/sync_service.py",
+      "contentHash": "8ff9c5e672f75b616fca006bc2395e18",
+      "mtime": 1767413683646.0286,
+      "functions": [
+        {
+          "name": "init_weaviate_client",
+          "signature": "def init_weaviate_client()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Initialize Weaviate client and ensure Agent collection exists.",
+          "decorators": [],
+          "start_line": 43,
+          "end_line": 80,
+          "is_async": false
+        },
+        {
+          "name": "init_embedding_provider",
+          "signature": "def init_embedding_provider()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Initialize Ollama embedding provider.",
+          "decorators": [],
+          "start_line": 83,
+          "end_line": 98,
+          "is_async": false
+        },
+        {
+          "name": "fetch_all_agents_from_letta",
+          "signature": "def fetch_all_agents_from_letta() -> List[Dict[str, Any]]",
+          "parameters": "()",
+          "return_type": "List[Dict[str, Any]]",
+          "docstring": "Fetch all agents from Letta API.",
+          "decorators": [],
+          "start_line": 101,
+          "end_line": 120,
+          "is_async": false
+        },
+        {
+          "name": "extract_agent_metadata",
+          "signature": "def extract_agent_metadata(agent: Dict[str, Any]) -> Dict[str, Any]",
+          "parameters": "(agent: Dict[str, Any])",
+          "return_type": "Dict[str, Any]",
+          "docstring": "Extract and format agent metadata for registry.",
+          "decorators": [],
+          "start_line": 123,
+          "end_line": 149,
+          "is_async": false
+        },
+        {
+          "name": "sync_agent_to_registry",
+          "signature": "def sync_agent_to_registry(agent_data: Dict[str, Any]) -> bool",
+          "parameters": "(agent_data: Dict[str, Any])",
+          "return_type": "bool",
+          "docstring": "Sync a single agent to the registry.",
+          "decorators": [],
+          "start_line": 152,
+          "end_line": 189,
+          "is_async": false
+        },
+        {
+          "name": "sync_agents",
+          "signature": "def sync_agents()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Main sync function - fetch agents from Letta and update registry.",
+          "decorators": [],
+          "start_line": 192,
+          "end_line": 222,
+          "is_async": false
+        },
+        {
+          "name": "main",
+          "signature": "def main()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Main service loop.",
+          "decorators": [],
+          "start_line": 225,
+          "end_line": 253,
+          "is_async": false
+        }
+      ],
+      "parsedAt": 1769590055543
+    },
+    "arxiv_integration.py": {
+      "path": "arxiv_integration.py",
+      "contentHash": "bf1e905527349cc3e821be0ffb339fd1",
+      "mtime": 1767413683646.0286,
+      "functions": [
+        {
+          "name": "ration():\n    \"\"\"Test ",
+          "signature": "def ration():\n    \"\"\"Test th",
+          "parameters": "th",
+          "return_type": null,
+          "docstring": "v integration with various queries\"\"\"\n    arxiv = Arx",
+          "decorators": [],
+          "start_line": 531,
+          "end_line": 562,
+          "is_async": false
+        }
+      ],
+      "parsedAt": 1769590055544
+    },
+    "letta_tool_utils.py": {
+      "path": "letta_tool_utils.py",
+      "contentHash": "3963361f1e09676b2bc494e9c38db4d3",
+      "mtime": 1767413683646.0286,
+      "functions": [
+        {
+          "name": "get_find_tools_id",
+          "signature": "def get_find_tools_id(agent_id: Optional[str] = None) -> Optional[str]",
+          "parameters": "(agent_id: Optional[str] = None)",
+          "return_type": "Optional[str]",
+          "docstring": "Dynamically query the Letta API to find the tool ID for find_tools.\n    If agent_id is provided, checks the agent's tools first.\n    Otherwise checks regular tools, then MCP servers.\n    \n    Args:\n        agent_id: Optional agent ID to check for attached tools\n        \n    Returns:\n        str: The tool ID for find_tools, or None if not found",
+          "decorators": [],
+          "start_line": 17,
+          "end_line": 127,
+          "is_async": false
+        },
+        {
+          "name": "get_find_tools_id_with_fallback",
+          "signature": "def get_find_tools_id_with_fallback(agent_id: Optional[str] = None, fallback_id: Optional[str] = None) -> str",
+          "parameters": "(agent_id: Optional[str] = None, fallback_id: Optional[str] = None)",
+          "return_type": "str",
+          "docstring": "Get the find_tools ID with a fallback if dynamic lookup fails.\n    \n    Args:\n        agent_id: Optional agent ID to check for attached tools\n        fallback_id: The ID to use if dynamic lookup fails (if not provided, uses hardcoded fallback)\n        \n    Returns:\n        str: The tool ID (either dynamically found or the fallback)",
+          "decorators": [],
+          "start_line": 129,
+          "end_line": 150,
+          "is_async": false
+        },
+        {
+          "name": "get_tool_id_by_name",
+          "signature": "def get_tool_id_by_name(tool_name: str) -> Optional[str]",
+          "parameters": "(tool_name: str)",
+          "return_type": "Optional[str]",
+          "docstring": "Find a tool ID by its name from the global tools list.\n    \n    Args:\n        tool_name: The name of the tool to find\n        \n    Returns:\n        str: The tool ID if found, None otherwise",
+          "decorators": [],
+          "start_line": 153,
+          "end_line": 186,
+          "is_async": false
+        },
+        {
+          "name": "get_agent_tool_names",
+          "signature": "def get_agent_tool_names(agent_id: str) -> set",
+          "parameters": "(agent_id: str)",
+          "return_type": "set",
+          "docstring": "Get the set of tool names currently attached to an agent.\n    \n    Args:\n        agent_id: The agent ID\n        \n    Returns:\n        set: Set of tool names (lowercase) attached to the agent",
+          "decorators": [],
+          "start_line": 189,
+          "end_line": 219,
+          "is_async": false
+        },
+        {
+          "name": "attach_tool_to_agent",
+          "signature": "def attach_tool_to_agent(agent_id: str, tool_id: str) -> bool",
+          "parameters": "(agent_id: str, tool_id: str)",
+          "return_type": "bool",
+          "docstring": "Attach a tool to an agent via the Letta API.\n    \n    Args:\n        agent_id: The agent ID\n        tool_id: The tool ID to attach\n        \n    Returns:\n        bool: True if successful, False otherwise",
+          "decorators": [],
+          "start_line": 222,
+          "end_line": 260,
+          "is_async": false
+        },
+        {
+          "name": "ensure_protected_tools",
+          "signature": "def ensure_protected_tools(agent_id: str, protected_tools_config: str = None) -> dict",
+          "parameters": "(agent_id: str, protected_tools_config: str = None)",
+          "return_type": "dict",
+          "docstring": "Ensure protected tools are attached to an agent.\n    \n    This function checks if protected tools are attached to the agent,\n    and attaches any missing ones. Protected tools are specified by name\n    and looked up to get their IDs.\n    \n    Args:\n        agent_id: The agent ID\n        protected_tools_config: Comma-separated list of tool names to protect\n                                (defaults to PROTECTED_TOOLS from config)\n                                \n    Returns:\n        dict: Result with 'success' (bool), 'attached' (list), 'already_present' (list), 'failed' (list)",
+          "decorators": [],
+          "start_line": 263,
+          "end_line": 330,
+          "is_async": false
+        }
+      ],
+      "parsedAt": 1769590055544
+    },
+    "register_find_agents_tool.py": {
+      "path": "register_find_agents_tool.py",
+      "contentHash": "e990f3911f0476452720b3e8806b5a42",
+      "mtime": 1767413683650.0286,
+      "functions": [
+        {
+          "name": "register_find_agents_tool",
+          "signature": "def register_find_agents_tool()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Register the find_agents tool with Letta.",
+          "decorators": [],
+          "start_line": 14,
+          "end_line": 142,
+          "is_async": false
+        }
+      ],
+      "parsedAt": 1769590055544
+    },
+    "tests/conftest.py": {
+      "path": "tests/conftest.py",
+      "contentHash": "d0ea8f8c4571388347b62048089a358e",
+      "mtime": 1767413683650.0286,
+      "functions": [
+        {
+          "name": "test_env_vars",
+          "signature": "def test_env_vars()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Set up test environment variables.",
+          "decorators": [
+            "@pytest.fixture(scope=\"session\")"
+          ],
+          "start_line": 33,
+          "end_line": 55,
+          "is_async": false
+        },
+        {
+          "name": "mock_config",
+          "signature": "def mock_config()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Mock configuration values for testing.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 59,
+          "end_line": 68,
+          "is_async": false
+        },
+        {
+          "name": "app",
+          "signature": "def app()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Create Flask app instance for testing.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 76,
+          "end_line": 82,
+          "is_async": false
+        },
+        {
+          "name": "client",
+          "signature": "def client(app)",
+          "parameters": "(app)",
+          "return_type": null,
+          "docstring": "Create Flask test client.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 86,
+          "end_line": 88,
+          "is_async": false
+        },
+        {
+          "name": "runner",
+          "signature": "def runner(app)",
+          "parameters": "(app)",
+          "return_type": null,
+          "docstring": "Create Flask CLI test runner.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 92,
+          "end_line": 94,
+          "is_async": false
+        },
+        {
+          "name": "mock_graphiti_response",
+          "signature": "def mock_graphiti_response()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Mock successful Graphiti API response.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 102,
+          "end_line": 125,
+          "is_async": false
+        },
+        {
+          "name": "mock_graphiti_empty_response",
+          "signature": "def mock_graphiti_empty_response()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Mock empty Graphiti API response (no results).",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 129,
+          "end_line": 134,
+          "is_async": false
+        },
+        {
+          "name": "mock_letta_agent_response",
+          "signature": "def mock_letta_agent_response()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Mock Letta agent details response.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 138,
+          "end_line": 149,
+          "is_async": false
+        },
+        {
+          "name": "mock_letta_memory_block",
+          "signature": "def mock_letta_memory_block()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Mock Letta memory block response.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 153,
+          "end_line": 161,
+          "is_async": false
+        },
+        {
+          "name": "mock_tool_discovery_response",
+          "signature": "def mock_tool_discovery_response()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Mock tool discovery API response.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 165,
+          "end_line": 182,
+          "is_async": false
+        },
+        {
+          "name": "webhook_payload_message_sent",
+          "signature": "def webhook_payload_message_sent()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Sample webhook payload for message_sent event.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 190,
+          "end_line": 203,
+          "is_async": false
+        },
+        {
+          "name": "webhook_payload_stream_started",
+          "signature": "def webhook_payload_stream_started()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Sample webhook payload for stream_started event with prompt.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 207,
+          "end_line": 223,
+          "is_async": false
+        },
+        {
+          "name": "webhook_payload_list_prompt",
+          "signature": "def webhook_payload_list_prompt()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Webhook payload with prompt as a list (common format).",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 227,
+          "end_line": 238,
+          "is_async": false
+        },
+        {
+          "name": "webhook_payload_empty",
+          "signature": "def webhook_payload_empty()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Empty webhook payload for error handling tests.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 242,
+          "end_line": 244,
+          "is_async": false
+        },
+        {
+          "name": "webhook_payload_malformed",
+          "signature": "def webhook_payload_malformed()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Malformed webhook payload for error handling tests.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 248,
+          "end_line": 254,
+          "is_async": false
+        },
+        {
+          "name": "mock_requests_session",
+          "signature": "def mock_requests_session()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Mock requests.Session for HTTP calls.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 262,
+          "end_line": 269,
+          "is_async": false
+        },
+        {
+          "name": "mock_graphiti_api",
+          "signature": "def mock_graphiti_api(mock_graphiti_response)",
+          "parameters": "(mock_graphiti_response)",
+          "return_type": null,
+          "docstring": "Mock the Graphiti API client.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 273,
+          "end_line": 277,
+          "is_async": false
+        },
+        {
+          "name": "mock_letta_api",
+          "signature": "def mock_letta_api()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Mock the Letta API client.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 281,
+          "end_line": 301,
+          "is_async": false
+        },
+        {
+          "name": "mock_matrix_client",
+          "signature": "def mock_matrix_client()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Mock Matrix client for notifications.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 305,
+          "end_line": 310,
+          "is_async": false
+        },
+        {
+          "name": "sample_context_entries",
+          "signature": "def sample_context_entries()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Sample context entries for testing context building.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 318,
+          "end_line": 339,
+          "is_async": false
+        },
+        {
+          "name": "sample_memory_blocks",
+          "signature": "def sample_memory_blocks()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Sample memory blocks for testing.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 343,
+          "end_line": 358,
+          "is_async": false
+        },
+        {
+          "name": "sample_tools",
+          "signature": "def sample_tools()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Sample tools for testing tool attachment.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 362,
+          "end_line": 383,
+          "is_async": false
+        },
+        {
+          "name": "make_api_url",
+          "signature": "def make_api_url()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Helper to construct API URLs for testing.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 391,
+          "end_line": 395,
+          "is_async": false
+        },
+        {
+          "name": "create_mock_response",
+          "signature": "def create_mock_response()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Helper to create mock HTTP responses.",
+          "decorators": [
+            "@pytest.fixture"
+          ],
+          "start_line": 399,
+          "end_line": 411,
+          "is_async": false
+        },
+        {
+          "name": "reset_agent_tracking",
+          "signature": "def reset_agent_tracking()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Reset agent tracking state before each test.",
+          "decorators": [
+            "@pytest.fixture(autouse=True)"
+          ],
+          "start_line": 419,
+          "end_line": 424,
+          "is_async": false
+        },
+        {
+          "name": "cleanup_environment",
+          "signature": "def cleanup_environment()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Cleanup environment after each test.",
+          "decorators": [
+            "@pytest.fixture(autouse=True)"
+          ],
+          "start_line": 428,
+          "end_line": 431,
+          "is_async": false
+        }
+      ],
+      "parsedAt": 1769590055544
+    },
+    "tests/performance/test_benchmarks.py": {
+      "path": "tests/performance/test_benchmarks.py",
+      "contentHash": "7ffa68299400650abc4a3e0239da0d40",
+      "mtime": 1767413683650.0286,
+      "functions": [
+        {
+          "name": "get_benchmark_mean",
+          "signature": "def get_benchmark_mean(benchmark)",
+          "parameters": "(benchmark)",
+          "return_type": null,
+          "docstring": "Get mean from benchmark stats, compatible with pytest-benchmark 5.x.",
+          "decorators": [],
+          "start_line": 19,
+          "end_line": 26,
+          "is_async": false
+        }
+      ],
+      "parsedAt": 1769590055544
+    },
+    "tool_manager.py": {
+      "path": "tool_manager.py",
+      "contentHash": "1bed570b8b9b3dc007cf5186b4aac187",
+      "mtime": 1767413683654.0288,
+      "functions": [
+        {
+          "name": "get_agent_tools",
+          "signature": "def get_agent_tools(agent_id: str) -> List[str]",
+          "parameters": "(agent_id: str)",
+          "return_type": "List[str]",
+          "docstring": "Get the list of tools currently attached to an agent.\n    Uses port 8283, X-BARE-PASSWORD authentication, and user_id header.\n    \n    Args:\n        agent_id (str): The agent ID to get tools for\n        \n    Returns:\n        List[str]: List of tool IDs attached to the agent, or empty list if error or none found",
+          "decorators": [],
+          "start_line": 13,
+          "end_line": 72,
+          "is_async": false
+        },
+        {
+          "name": "find_attach_tools",
+          "signature": "def find_attach_tools(query: str = None, agent_id: str = None, keep_tools: str = None, \n                        limit: int = 5, min_score: float = 75.0, request_heartbeat: bool = False,\n                        return_structured: bool = False)",
+          "parameters": "(query: str = None, agent_id: str = None, keep_tools: str = None, \n                        limit: int = 5, min_score: float = 75.0, request_heartbeat: bool = False,\n                        return_structured: bool = False)",
+          "return_type": null,
+          "docstring": "Silently manage tools for the agent. Uses port 8020 and no specific auth headers beyond Content-Type.\n    \n    Args:\n        query (str): Your search query - what kind of tool are you looking for?\n        agent_id (str): Your agent ID\n        keep_tools (str): Comma-separated list of tool IDs to preserve.\n                          If None or empty, no tools are explicitly kept (API default behavior).\n        limit (int): Maximum number of tools to find (default: 5)\n        min_score (float): Minimum match score 0-100 (default: 75.0) - INCREASED for more aggressive filtering\n        request_heartbeat (bool): Whether to request an immediate heartbeat (default: False)\n        return_structured (bool): If True, return the full API response dict instead of string message\n    \n    Returns:\n        str or dict: Success message (str) or full API response (dict) if return_structured=True",
+          "decorators": [],
+          "start_line": 75,
+          "end_line": 200,
+          "is_async": false
+        },
+        {
+          "name": "find_agents",
+          "signature": "def find_agents(query: str, limit: int = 10, min_score: float = 0.3) -> str",
+          "parameters": "(query: str, limit: int = 10, min_score: float = 0.3)",
+          "return_type": "str",
+          "docstring": "Search for relevant agents in the agent registry based on a query.\n    \n    Args:\n        query (str): Your search query - what kind of agent are you looking for?\n        limit (int): Maximum number of agents to return (default: 10)\n        min_score (float): Minimum relevance score 0-1 (default: 0.3)\n    \n    Returns:\n        str: Formatted list of agents or error message",
+          "decorators": [],
+          "start_line": 203,
+          "end_line": 267,
+          "is_async": false
+        }
+      ],
+      "parsedAt": 1769590055544
+    },
+    "webhook_server/agent_registry.py": {
+      "path": "webhook_server/agent_registry.py",
+      "contentHash": "2d47a227af5acb4f80005c4774f4334e",
+      "mtime": 1767413683654.0288,
+      "functions": [
+        {
+          "name": "get_agent_details_from_letta",
+          "signature": "def get_agent_details_from_letta(agent_id: str) -> Optional[Dict]",
+          "parameters": "(agent_id: str)",
+          "return_type": "Optional[Dict]",
+          "docstring": "Fetch agent details from Letta API.\n    \n    Args:\n        agent_id: The agent ID to fetch details for\n        \n    Returns:\n        Dict with agent details or None if error",
+          "decorators": [],
+          "start_line": 26,
+          "end_line": 56,
+          "is_async": false
+        },
+        {
+          "name": "extract_capabilities_from_system_prompt",
+          "signature": "def extract_capabilities_from_system_prompt(system_prompt: str) -> List[str]",
+          "parameters": "(system_prompt: str)",
+          "return_type": "List[str]",
+          "docstring": "Extract capability keywords from agent's system prompt.\n    \n    Args:\n        system_prompt: The agent's system prompt text\n        \n    Returns:\n        List of capability keywords",
+          "decorators": [],
+          "start_line": 59,
+          "end_line": 88,
+          "is_async": false
+        },
+        {
+          "name": "register_agent",
+          "signature": "def register_agent(agent_id: str) -> bool",
+          "parameters": "(agent_id: str)",
+          "return_type": "bool",
+          "docstring": "Register a new agent with the agent registry service.\n    \n    Args:\n        agent_id: The agent ID to register\n        \n    Returns:\n        bool: True if successful, False otherwise",
+          "decorators": [],
+          "start_line": 91,
+          "end_line": 145,
+          "is_async": false
+        },
+        {
+          "name": "query_agent_registry",
+          "signature": "def query_agent_registry(query: str, limit: int = None, min_score: float = None) -> Dict",
+          "parameters": "(query: str, limit: int = None, min_score: float = None)",
+          "return_type": "Dict",
+          "docstring": "Query the agent registry for relevant agents based on semantic search.\n    \n    Args:\n        query: The search query (typically the user's message)\n        limit: Maximum number of agents to return (default: DEFAULT_MAX_AGENTS)\n        min_score: Minimum relevance score 0-1 (default: DEFAULT_MIN_SCORE)\n        \n    Returns:\n        Dict with search results or error information",
+          "decorators": [],
+          "start_line": 148,
+          "end_line": 206,
+          "is_async": false
+        },
+        {
+          "name": "format_agent_context",
+          "signature": "def format_agent_context(agent_results: Dict) -> str",
+          "parameters": "(agent_results: Dict)",
+          "return_type": "str",
+          "docstring": "Format agent search results into a minimal context string for memory block.\n    Only includes agent name and ID to minimize token usage.\n    \n    Args:\n        agent_results: Results from query_agent_registry()\n        \n    Returns:\n        Formatted string for memory block",
+          "decorators": [],
+          "start_line": 209,
+          "end_line": 242,
+          "is_async": false
+        }
+      ],
+      "parsedAt": 1769590055545
+    },
+    "webhook_server/app.py": {
+      "path": "webhook_server/app.py",
+      "contentHash": "d5202ade7d492a2182aa6ef3304f057b",
+      "mtime": 1769391455558.1787,
+      "functions": [
+        {
+          "name": "track_agent_and_notify",
+          "signature": "def track_agent_and_notify(agent_id: str | None) -> None",
+          "parameters": "(agent_id: str | None)",
+          "return_type": "None",
+          "docstring": "Track agent and notify Matrix client if new agent is detected. Also registers agent with agent registry.",
+          "decorators": [],
+          "start_line": 33,
+          "end_line": 71,
+          "is_async": false
+        },
+        {
+          "name": "health",
+          "signature": "def health()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Health check endpoint for Docker.",
+          "decorators": [
+            "@app.route('/health', methods=['GET'])"
+          ],
+          "start_line": 74,
+          "end_line": 81,
+          "is_async": false
+        },
+        {
+          "name": "agent_tracker_status",
+          "signature": "def agent_tracker_status()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Get current status of agent tracking.",
+          "decorators": [
+            "@app.route(\"/agent-tracker/status\", methods=[\"GET\"])"
+          ],
+          "start_line": 84,
+          "end_line": 92,
+          "is_async": false
+        },
+        {
+          "name": "reset_agent_tracker",
+          "signature": "def reset_agent_tracker()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Reset the agent tracking state (for testing).",
+          "decorators": [
+            "@app.route(\"/agent-tracker/reset\", methods=[\"POST\"])"
+          ],
+          "start_line": 95,
+          "end_line": 103,
+          "is_async": false
+        },
+        {
+          "name": "extract_user_intent",
+          "signature": "def extract_user_intent(prompt: str) -> str",
+          "parameters": "(prompt: str)",
+          "return_type": "str",
+          "docstring": "Extract the actual user intent from a prompt by stripping metadata prefixes.\n    Handles Matrix message format, OpenCode format, and other wrapper patterns.",
+          "decorators": [],
+          "start_line": 112,
+          "end_line": 134,
+          "is_async": false
+        },
+        {
+          "name": "should_skip_tool_attachment",
+          "signature": "def should_skip_tool_attachment(prompt: str) -> bool",
+          "parameters": "(prompt: str)",
+          "return_type": "bool",
+          "docstring": "Determine if tool attachment should be skipped for trivial messages.\n    Returns True if the message is too short/trivial to warrant tool search.",
+          "decorators": [],
+          "start_line": 136,
+          "end_line": 164,
+          "is_async": false
+        },
+        {
+          "name": "query_graphiti_api",
+          "signature": "def query_graphiti_api(query: str, max_nodes: int = None, max_facts: int = None) -> dict",
+          "parameters": "(query: str, max_nodes: int = None, max_facts: int = None)",
+          "return_type": "dict",
+          "docstring": "Query the Graphiti search API for context with robust timeout and retry handling.\n    Uses separate /search (facts) and /search/nodes endpoints.",
+          "decorators": [],
+          "start_line": 166,
+          "end_line": 283,
+          "is_async": false
+        },
+        {
+          "name": "generate_context_from_prompt",
+          "signature": "def generate_context_from_prompt(prompt: str, agent_id: str) -> dict",
+          "parameters": "(prompt: str, agent_id: str)",
+          "return_type": "dict",
+          "docstring": "Generates context from a prompt, handling Graphiti, arXiv and GDELT searches.",
+          "decorators": [],
+          "start_line": 285,
+          "end_line": 317,
+          "is_async": false
+        },
+        {
+          "name": "health_check",
+          "signature": "def health_check()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "A simple health check endpoint that returns a 200 OK response.",
+          "decorators": [
+            "@app.route(\"/health\", methods=[\"GET\"])"
+          ],
+          "start_line": 320,
+          "end_line": 324,
+          "is_async": false
+        },
+        {
+          "name": "webhook_receiver",
+          "signature": "def webhook_receiver()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Receives webhooks from Letta, generates context, and returns it.\n    Supports both /webhook and /webhook/letta endpoints for compatibility.",
+          "decorators": [
+            "@app.route(\"/webhook\", methods=[\"POST\"])",
+            "@app.route(\"/webhook/letta\", methods=[\"POST\"])"
+          ],
+          "start_line": 328,
+          "end_line": 491,
+          "is_async": false
+        }
+      ],
+      "parsedAt": 1769590055545
+    },
+    "webhook_server/block_finders.py": {
+      "path": "webhook_server/block_finders.py",
+      "contentHash": "6feade5185df7d92d69c9b26eba32302",
+      "mtime": 1767413683654.0288,
+      "functions": [
+        {
+          "name": "find_memory_block",
+          "signature": "def find_memory_block(agent_id: str, block_label: str) -> Tuple[Optional[dict], bool]",
+          "parameters": "(agent_id: str, block_label: str)",
+          "return_type": "Tuple[Optional[dict], bool]",
+          "docstring": "Finds a memory block with a specific label for a given agent.\n    \n    Args:\n        agent_id: The ID of the agent.\n        block_label: The label of the block to find (e.g., 'graphiti_context').\n\n    Returns:\n        A tuple containing the block dictionary and a boolean indicating if the\n        block is attached to the agent, or (None, False) if not found.",
+          "decorators": [],
+          "start_line": 7,
+          "end_line": 70,
+          "is_async": false
+        }
+      ],
+      "parsedAt": 1769590055545
+    },
+    "webhook_server/config.py": {
+      "path": "webhook_server/config.py",
+      "contentHash": "6dc307200a3091c5c617e432b9a49426",
+      "mtime": 1769391411753.131,
+      "functions": [
+        {
+          "name": "get_api_url",
+          "signature": "def get_api_url(path: str) -> str",
+          "parameters": "(path: str)",
+          "return_type": "str",
+          "docstring": "Construct API URL following Letta's v1 convention.",
+          "decorators": [],
+          "start_line": 32,
+          "end_line": 37,
+          "is_async": false
+        },
+        {
+          "name": "get_graphiti_config",
+          "signature": "def get_graphiti_config()",
+          "parameters": "()",
+          "return_type": null,
+          "docstring": "Get Graphiti configuration.",
+          "decorators": [],
+          "start_line": 39,
+          "end_line": 45,
+          "is_async": false
+        }
+      ],
+      "parsedAt": 1769590055545
+    },
+    "webhook_server/memory_manager.py": {
+      "path": "webhook_server/memory_manager.py",
+      "contentHash": "4572125e347332e8cc03b42ce59d7103",
+      "mtime": 1767413683654.0288,
+      "functions": [
+        {
+          "name": "update_memory_block",
+          "signature": "def update_memory_block(block_id: str, block_data: Dict[str, Any], agent_id: Optional[str] = None, existing_block: Optional[dict] = None) -> Dict[str, Any]",
+          "parameters": "(block_id: str, block_data: Dict[str, Any], agent_id: Optional[str] = None, existing_block: Optional[dict] = None)",
+          "return_type": "Dict[str, Any]",
+          "docstring": "Update an existing memory block with new data using cumulative context.",
+          "decorators": [],
+          "start_line": 8,
+          "end_line": 28,
+          "is_async": false
+        },
+        {
+          "name": "attach_block_to_agent",
+          "signature": "def attach_block_to_agent(agent_id: str, block_id: str) -> bool",
+          "parameters": "(agent_id: str, block_id: str)",
+          "return_type": "bool",
+          "docstring": "Attach a block to an agent's core memory.",
+          "decorators": [],
+          "start_line": 30,
+          "end_line": 64,
+          "is_async": false
+        },
+        {
+          "name": "create_memory_block",
+          "signature": "def create_memory_block(block_data: Dict[str, Any], agent_id: Optional[str] = None) -> Dict[str, Any]",
+          "parameters": "(block_data: Dict[str, Any], agent_id: Optional[str] = None)",
+          "return_type": "Dict[str, Any]",
+          "docstring": "Create or update a memory block in Letta with auto-attachment.",
+          "decorators": [],
+          "start_line": 66,
+          "end_line": 97,
+          "is_async": false
+        }
+      ],
+      "parsedAt": 1769590055545
+    },
+    "webhook_server/tool_inventory.py": {
+      "path": "webhook_server/tool_inventory.py",
+      "contentHash": "d3809a2f2eff343a2a9d9a3d9e7bfb27",
+      "mtime": 1767413683654.0288,
+      "functions": [
+        {
+          "name": "get_agent_tools_with_details",
+          "signature": "def get_agent_tools_with_details(agent_id: str) -> List[Dict]",
+          "parameters": "(agent_id: str)",
+          "return_type": "List[Dict]",
+          "docstring": "Fetch all tools attached to an agent with full metadata.\n    \n    Args:\n        agent_id: The agent ID\n        \n    Returns:\n        List of tool dicts with: id, name, description, mcp_server_name, tags, etc.",
+          "decorators": [],
+          "start_line": 60,
+          "end_line": 90,
+          "is_async": false
+        },
+        {
+          "name": "categorize_tool",
+          "signature": "def categorize_tool(tool: Dict) -> str",
+          "parameters": "(tool: Dict)",
+          "return_type": "str",
+          "docstring": "Determine the category for a tool based on its metadata.\n    \n    Args:\n        tool: Tool dict with metadata\n        \n    Returns:\n        Category name",
+          "decorators": [],
+          "start_line": 93,
+          "end_line": 126,
+          "is_async": false
+        },
+        {
+          "name": "categorize_tools",
+          "signature": "def categorize_tools(tools: List[Dict]) -> Dict[str, List[Dict]]",
+          "parameters": "(tools: List[Dict])",
+          "return_type": "Dict[str, List[Dict]]",
+          "docstring": "Categorize tools into domains.\n    \n    Args:\n        tools: List of tool dicts\n        \n    Returns:\n        Dict mapping category name to list of tools",
+          "decorators": [],
+          "start_line": 129,
+          "end_line": 145,
+          "is_async": false
+        },
+        {
+          "name": "record_tool_attachment",
+          "signature": "def record_tool_attachment(agent_id: str, tool_name: str, tool_id: str, \n                          reason: str, score: float)",
+          "parameters": "(agent_id: str, tool_name: str, tool_id: str, \n                          reason: str, score: float)",
+          "return_type": null,
+          "docstring": "Record when a tool was attached and why.\n    \n    Args:\n        agent_id: The agent ID\n        tool_name: Name of the tool\n        tool_id: ID of the tool\n        reason: Why it was attached (e.g., \"auto: keyword 'search'\")\n        score: Match score (0-100)",
+          "decorators": [],
+          "start_line": 148,
+          "end_line": 177,
+          "is_async": false
+        },
+        {
+          "name": "get_recent_attachments",
+          "signature": "def get_recent_attachments(agent_id: str, limit: int = 5) -> List[Dict]",
+          "parameters": "(agent_id: str, limit: int = 5)",
+          "return_type": "List[Dict]",
+          "docstring": "Get recent tool attachments for an agent.\n    \n    Args:\n        agent_id: The agent ID\n        limit: Maximum number to return\n        \n    Returns:\n        List of recent attachment records",
+          "decorators": [],
+          "start_line": 180,
+          "end_line": 191,
+          "is_async": false
+        },
+        {
+          "name": "format_tool_entry",
+          "signature": "def format_tool_entry(tool: Dict, include_description: bool = True) -> str",
+          "parameters": "(tool: Dict, include_description: bool = True)",
+          "return_type": "str",
+          "docstring": "Format a single tool for display.\n    \n    Args:\n        tool: Tool dict\n        include_description: Whether to include description\n        \n    Returns:\n        Formatted string",
+          "decorators": [],
+          "start_line": 194,
+          "end_line": 215,
+          "is_async": false
+        },
+        {
+          "name": "at_tool_inventory(age",
+          "signature": "def at_tool_inventory(agent_id: str, tools: List[Dict], \n                          prompt: Optional[str] = None) ->  -> \n  ",
+          "parameters": "nt_id: str, tools: List[Dict], \n                          prompt: Optional[str] = None) -> ",
+          "return_type": "\n  ",
+          "docstring": "Format tools into concise memory block content.\n    \n    Args:\n        agent_id: The agent ID\n        tools: List of all tools attached to agent\n        prompt: Optional prompt that triggered this update (for context)\n        \n    Returns:\n        Formatted inventory string\n    \"\"\"",
+          "decorators": [],
+          "start_line": 218,
+          "end_line": 306,
+          "is_async": false
+        },
+        {
+          "name": "tr] = None,\n              ",
+          "signature": "def tr] = None,\n                               attachment_result: Optional[Dict] = None) -> Dict:\n    \"\"\"\n    Build the complete tool inventory memo -> lock",
+          "parameters": "                 attachment_result: Optional[Dict] = None) -> Dict:\n    \"\"\"\n    Build the complete tool inventory memo",
+          "return_type": "lock",
+          "docstring": "n agent.\n    \n    Args:\n        agent_id: The agent ID\n        prompt: Optional prompt that triggered this\n        attachment_result: Optional structured result from find_attach_tools\n        \n    Returns:\n        Dict with 'success' (bool), 'content' (str), and optional 'error' (str) keys\n    \"\"\"\n    try:\n        # Record any new attachments if provided",
+          "decorators": [],
+          "start_line": 309,
+          "end_line": 367,
+          "is_async": false
+        }
+      ],
+      "parsedAt": 1769590055545
+    }
+  }
+}

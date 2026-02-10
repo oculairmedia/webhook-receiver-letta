@@ -109,6 +109,26 @@ DEFAULT_MAX_FACTS = int(os.environ.get("GRAPHITI_MAX_FACTS", "20"))
 
 import re
 
+def resolve_agent_from_conversation(path: str) -> str | None:
+    """Resolve agent_id from a /v1/conversations/{id}/messages path via the Letta API."""
+    match = re.search(r'/conversations/([^/]+)', path)
+    if not match:
+        return None
+    conv_id = match.group(1)
+    try:
+        from .config import get_api_url, LETTA_API_HEADERS
+        url = get_api_url(f"conversations/{conv_id}")
+        resp = requests.get(url, headers=LETTA_API_HEADERS, timeout=10)
+        if resp.ok:
+            agent_id = resp.json().get("agent_id")
+            print(f"[CONV_RESOLVE] {conv_id} -> {agent_id}")
+            return agent_id
+        else:
+            print(f"[CONV_RESOLVE] Failed for {conv_id}: HTTP {resp.status_code}")
+    except Exception as e:
+        print(f"[CONV_RESOLVE] Error for {conv_id}: {e}")
+    return None
+
 def extract_user_intent(prompt: str) -> str:
     """
     Extract the actual user intent from a prompt by stripping metadata prefixes.
@@ -118,6 +138,9 @@ def extract_user_intent(prompt: str) -> str:
         return ""
     
     cleaned = prompt.strip()
+    
+    # Strip <system-reminder> ... </system-reminder> blocks (may appear anywhere)
+    cleaned = re.sub(r'<system-reminder>.*?</system-reminder>', '', cleaned, flags=re.DOTALL)
     
     # Strip Matrix prefix: [Matrix: @user:domain in Room Name]
     matrix_pattern = r'^\[Matrix:[^\]]+\]\s*'
@@ -130,6 +153,9 @@ def extract_user_intent(prompt: str) -> str:
     # Strip response instruction blocks at the end
     response_instruction_pattern = r'---\s*RESPONSE INSTRUCTION.*$'
     cleaned = re.sub(response_instruction_pattern, '', cleaned, flags=re.DOTALL | re.IGNORECASE)
+    
+    # Strip any remaining XML-like metadata tags (e.g. <context>, <instructions>)
+    cleaned = re.sub(r'<[a-z_-]+>.*?</[a-z_-]+>', '', cleaned, flags=re.DOTALL | re.IGNORECASE)
     
     return cleaned.strip()
 
@@ -162,6 +188,19 @@ def should_skip_tool_attachment(prompt: str) -> bool:
             return True
     
     return False
+
+def fetch_recent_episodes(agent_id: str, last_n: int = 3) -> list:
+    try:
+        url = f"{GRAPHITI_API_URL}/episodes/{agent_id}"
+        resp = requests.get(url, params={"last_n": last_n}, timeout=10)
+        resp.raise_for_status()
+        episodes = resp.json().get("episodes", [])
+        print(f"[GRAPHITI] Fetched {len(episodes)} recent episodes for {agent_id}")
+        return episodes
+    except Exception as e:
+        print(f"[GRAPHITI] Episode fetch failed for {agent_id}: {e}")
+        return []
+
 
 def query_graphiti_api(query: str, max_nodes: int = None, max_facts: int = None) -> dict:
     """
@@ -283,37 +322,35 @@ def query_graphiti_api(query: str, max_nodes: int = None, max_facts: int = None)
         return {"context": error_msg, "success": False}
 
 def generate_context_from_prompt(prompt: str, agent_id: str) -> dict:
-    """
-    Generates context from a prompt, handling Graphiti, arXiv and GDELT searches.
-    """
-    # Extract key terms from prompt for better Graphiti search
-    # Use single most important word to maximize recall (Graphiti search works best with simple queries)
-    stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should', 'could', 'can', 'may', 'might', 'must', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'this', 'that', 'these', 'those', 'what', 'which', 'who', 'when', 'where', 'why', 'how', 'help', 'tell', 'me', 'about', 'know', 'get', 'make', 'see', 'look', 'find', 'show', 'give', 'need', 'want', 'think'}
-    words = prompt.lower().split()
-    key_words = [w for w in words if w not in stop_words and len(w) > 3][:2]  # Take top 2 words
-    keywords_only = ' '.join(key_words) if key_words else ''
-    
-    # Combine keywords with full message for comprehensive search
-    search_query = f"{keywords_only} {prompt}".strip() if keywords_only else prompt
-    
-    print(f"[CONTEXT_GEN] Original prompt: '{prompt[:100]}...'")
-    print(f"[CONTEXT_GEN] Extracted keywords: '{keywords_only}'")
-    print(f"[CONTEXT_GEN] Full search query: '{search_query[:150]}...'")
-    
-    # Start with Graphiti search using keywords + full message
-    graphiti_result = query_graphiti_api(search_query)
-    
-    # Check for arXiv trigger
+    cleaned_prompt = extract_user_intent(prompt)
+    if not cleaned_prompt:
+        cleaned_prompt = prompt
+
+    print(f"[CONTEXT_GEN] Raw prompt: '{prompt[:100]}...'")
+    print(f"[CONTEXT_GEN] Cleaned prompt: '{cleaned_prompt[:100]}...'")
+
+    graphiti_result = query_graphiti_api(cleaned_prompt)
+
+    episodes = fetch_recent_episodes(agent_id, last_n=3)
+    if episodes:
+        episode_lines = []
+        for ep in episodes:
+            source = ep.get("source_description", ep.get("source", "unknown"))
+            content = ep.get("content", "")[:200]
+            episode_lines.append(f"- [{source}] {content}")
+        episode_section = "\n\nRecent Conversation Context:\n" + "\n".join(episode_lines)
+        existing_context = graphiti_result.get("context", "")
+        graphiti_result["context"] = existing_context + episode_section
+        graphiti_result["success"] = True
+
     should_arxiv, arxiv_query = arxiv_integration.should_trigger_arxiv_search(prompt)
     if should_arxiv:
-        # Fix: ArxivIntegration.generate_arxiv_context() only takes 1 argument (query)
         arxiv_result = arxiv_integration.generate_arxiv_context(arxiv_query)
-        # Combine with Graphiti results if available
         combined_context = graphiti_result.get("context", "")
         if arxiv_result.get("context"):
             combined_context += "\n\n" + arxiv_result.get("context", "")
         return {"context": combined_context, "success": True}
-    
+
     return graphiti_result
 
 @app.route("/health", methods=["GET"])
@@ -341,16 +378,17 @@ def webhook_receiver():
         agent_id = None
         prompt = None
 
-        if event_type == "message_sent":
+        if event_type in ("message_sent", "stream_started"):
             prompt = data.get("prompt")
-            # Try to get agent_id from response first
+            if not prompt and data.get("request") and data["request"].get("body"):
+                prompt = data["request"]["body"].get("input", "")
+            
             if data.get("response"):
                 agent_id = data["response"].get("agent_id")
-            # If not found, try to extract from request path
+            
             if not agent_id and data.get("request") and data["request"].get("path"):
                 path = data["request"]["path"]
                 if "/agents/" in path:
-                    # Extract agent_id from path like /v1/agents/agent-xxx/messages
                     path_parts = path.split("/")
                     if "agents" in path_parts:
                         agent_idx = path_parts.index("agents") + 1
@@ -358,16 +396,8 @@ def webhook_receiver():
                             potential_agent_id = path_parts[agent_idx]
                             if potential_agent_id.startswith("agent-"):
                                 agent_id = potential_agent_id
-        elif event_type == "stream_started":
-            prompt = data.get("prompt")
-            if not prompt and data.get("request") and data["request"].get("body"):
-                prompt = data["request"]["body"].get("input", "")
-            if data.get("request") and data["request"].get("path"):
-                path_parts = data["request"]["path"].split("/")
-                if "agents" in path_parts:
-                    agent_id_index = path_parts.index("agents") + 1
-                    if agent_id_index < len(path_parts):
-                        agent_id = path_parts[agent_id_index]
+                elif "/conversations/" in path:
+                    agent_id = resolve_agent_from_conversation(path)
 
         # Extract text from prompt if it's a list of objects
         if isinstance(prompt, list):

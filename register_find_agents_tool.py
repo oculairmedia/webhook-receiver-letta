@@ -8,7 +8,7 @@ import os
 import requests
 import json
 
-LETTA_API_URL = os.environ.get("LETTA_API_URL", "https://letta.oculair.ca/v1")
+LETTA_API_URL = os.environ.get("LETTA_API_URL", "http://192.168.50.90:8289/v1")
 LETTA_PASSWORD = os.environ.get("LETTA_PASSWORD")
 
 def register_find_agents_tool():

@@ -26,7 +26,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Configuration from environment
-LETTA_BASE_URL = os.environ.get("LETTA_BASE_URL", "https://letta2.oculair.ca")
+LETTA_BASE_URL = os.environ.get("LETTA_BASE_URL", "http://192.168.50.90:8289")
 LETTA_PASSWORD = os.environ.get("LETTA_PASSWORD", "")
 WEAVIATE_URL = os.environ.get("WEAVIATE_URL", "http://weaviate:8080")
 OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://192.168.50.80:11434")

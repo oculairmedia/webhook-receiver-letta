@@ -1,7 +1,7 @@
 import os
 
 # Default configuration
-LETTA_BASE_URL = os.environ.get("LETTA_BASE_URL", "https://letta2.oculair.ca")
+LETTA_BASE_URL = os.environ.get("LETTA_BASE_URL", "http://192.168.50.90:8289")
 LETTA_PASSWORD = os.environ.get("LETTA_PASSWORD", "lettaSecurePass123")
 LETTA_API_HEADERS = {
     "Content-Type": "application/json",

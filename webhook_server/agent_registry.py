@@ -19,7 +19,7 @@ DEFAULT_MAX_AGENTS = int(os.environ.get("AGENT_REGISTRY_MAX_AGENTS", "10"))
 DEFAULT_MIN_SCORE = float(os.environ.get("AGENT_REGISTRY_MIN_SCORE", "0.3"))
 
 # Letta API configuration for fetching agent details
-LETTA_API_URL = os.environ.get("LETTA_API_URL", "https://letta.oculair.ca/v1")
+LETTA_API_URL = os.environ.get("LETTA_API_URL", "http://192.168.50.90:8289/v1")
 LETTA_API_KEY = os.environ.get("LETTA_PASSWORD")
 
 

@@ -28,6 +28,12 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - DEBUG_MODE=${DEBUG_MODE:-false}
     restart: unless-stopped
+    labels:
+      - homepage.group=AI & Automation
+      - homepage.name=Letta Webhook Receiver
+      - homepage.icon=si-fastapi
+      - homepage.href=http://192.168.50.90:5005
+      - homepage.description=Webhook receiver for Letta agents with Graphiti integration
     networks:
       - letta-network
       - agent-registry-network
@@ -59,6 +65,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    labels:
+      - homepage.group=Search & Data
+      - homepage.name=Weaviate Vector DB
+      - homepage.icon=si-elasticsearch
+      - homepage.href=http://192.168.50.90:8092
+      - homepage.description=Vector database for agent embeddings
   # Agent Registry Service
   agent-registry:
     build:
@@ -78,6 +90,12 @@ services:
       weaviate:
         condition: service_healthy
     restart: unless-stopped
+    labels:
+      - homepage.group=AI & Automation
+      - homepage.name=Agent Registry
+      - homepage.icon=si-python
+      - homepage.href=http://192.168.50.90:8021
+      - homepage.description=Agent registry and discovery service
     networks:
       - agent-registry-network
       - letta-network
@@ -94,7 +112,7 @@ services:
       OLLAMA_EMBEDDING_MODEL: dengcao/Qwen3-Embedding-4B:Q4_K_M
       EMBEDDING_DIMENSION: 2560
       EMBEDDING_PROVIDER: ollama
-      LETTA_BASE_URL: https://letta2.oculair.ca
+      LETTA_BASE_URL: http://192.168.50.90:8289
       LETTA_PASSWORD: lettaSecurePass123
       SYNC_INTERVAL: ${AGENT_SYNC_INTERVAL:-300}
     depends_on:
@@ -124,6 +142,12 @@ services:
     depends_on:
       - agent-registry
     restart: unless-stopped
+    labels:
+      - homepage.group=AI & Automation
+      - homepage.name=Agent Registry MCP
+      - homepage.icon=si-python
+      - homepage.href=http://192.168.50.90:8022
+      - homepage.description=MCP server for agent registry
     networks:
       - agent-registry-network
     healthcheck:

@@ -12,7 +12,7 @@ services:
       - FLASK_ENV=production
       # Core API Configuration
       - GRAPHITI_URL=${GRAPHITI_URL:-http://192.168.50.90:8001/api}
-      - LETTA_BASE_URL=${LETTA_BASE_URL:-https://letta2.oculair.ca}
+      - LETTA_BASE_URL=${LETTA_BASE_URL:-http://192.168.50.90:8289}
       - LETTA_PASSWORD=${LETTA_PASSWORD:-lettaSecurePass123}
       - CEREBRAS_API_KEY=${CEREBRAS_API_KEY}
       # Context Retrieval Configuration
