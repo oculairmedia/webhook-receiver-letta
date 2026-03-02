@@ -504,6 +504,12 @@ def webhook_receiver():
                 
                 find_tools_id = get_find_tools_id_with_fallback(agent_id=agent_id)
                 keep_tools_list = ["*", find_tools_id]
+                
+                # Add protected tools to keep list so toolselector never detaches them
+                from .config import PROTECTED_TOOLS
+                if PROTECTED_TOOLS:
+                    keep_tools_list.extend([t.strip() for t in PROTECTED_TOOLS.split(',') if t.strip()])
+                
                 keep_tools_str = ",".join(keep_tools_list)
                 
                 from .config import TOOL_ATTACHMENT_MIN_SCORE, TOOL_ATTACHMENT_LIMIT

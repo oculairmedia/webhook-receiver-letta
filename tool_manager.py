@@ -30,9 +30,8 @@ def get_agent_tools(agent_id: str) -> List[str]: # Return type is List of string
     url = f"http://192.168.50.90:8283/v1/agents/{agent_id}/tools" 
     headers = {
         "Content-Type": "application/json",
-        "Accept": "application/json", 
+        "Accept": "application/json",
         "X-BARE-PASSWORD": f"password {LETTA_PASSWORD}",
-        "user_id": agent_id # As per API docs for this endpoint from user
     }
     
     try:

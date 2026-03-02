@@ -23,7 +23,7 @@ MAX_CONTEXT_SNIPPET_LENGTH = 8000
 # These tools should always be attached to agents and never detached
 # Format: comma-separated list of tool IDs or tool names
 # Can be set via environment variable PROTECTED_TOOLS
-PROTECTED_TOOLS_DEFAULT = ""  # Empty by default - no forced tools
+PROTECTED_TOOLS_DEFAULT = "search_documents,tool-e31645ef-1b8f-4d1d-927f-98797d80d938"  # Name + ID for certainty
 PROTECTED_TOOLS = os.environ.get("PROTECTED_TOOLS", PROTECTED_TOOLS_DEFAULT)
 
 # Tool attachment configuration
