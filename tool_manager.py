@@ -116,11 +116,30 @@ def find_attach_tools(query: str = None, agent_id: str = None, keep_tools: str =
                     keep_tool_ids_list = [x for x in keep_tool_ids_list if not (x in seen or seen.add(x))]
                     print(f"[find_attach_tools] Expanded '*' to {len(current_tool_ids)} current tools")
                 else:
-                    print(f"[find_attach_tools] Warning: '*' specified but no tools found for agent {agent_id}")
-                    keep_tool_ids_list.remove("*")
+                    # FAIL-CLOSED: Cannot enumerate agent tools, abort to prevent accidental pruning
+                    print(f"[find_attach_tools] ABORT: '*' wildcard expansion failed for agent {agent_id} — "
+                          f"cannot enumerate current tools. Skipping tool attachment to prevent accidental pruning.",
+                          file=sys.stderr)
+                    return json.dumps({
+                        "error": "wildcard_expansion_failed",
+                        "message": "Could not enumerate agent tools. Tool attachment aborted to prevent pruning.",
+                        "agent_id": agent_id
+                    }) if not return_structured else {
+                        "error": "wildcard_expansion_failed",
+                        "message": "Could not enumerate agent tools. Tool attachment aborted to prevent pruning.",
+                        "agent_id": agent_id
+                    }
             else:
-                print(f"[find_attach_tools] Warning: '*' specified but no agent_id provided, removing wildcard")
-                keep_tool_ids_list.remove("*")
+                # No agent_id means we can't expand — fail closed
+                print(f"[find_attach_tools] ABORT: '*' wildcard specified but no agent_id provided. "
+                      f"Skipping tool attachment to prevent accidental pruning.", file=sys.stderr)
+                return json.dumps({
+                    "error": "wildcard_expansion_failed",
+                    "message": "Wildcard specified but no agent_id provided. Tool attachment aborted.",
+                }) if not return_structured else {
+                    "error": "wildcard_expansion_failed",
+                    "message": "Wildcard specified but no agent_id provided. Tool attachment aborted.",
+                }
     
     payload: Dict[str, Any] = {
         "limit": limit,

@@ -20,11 +20,10 @@ GRAPHITI_MAX_FACTS = int(os.environ.get("GRAPHITI_MAX_FACTS", "20"))
 MAX_CONTEXT_SNIPPET_LENGTH = 8000
 
 # Protected tools configuration
-# These tools should always be attached to agents and never detached
-# Format: comma-separated list of tool IDs or tool names
-# Can be set via environment variable PROTECTED_TOOLS
-PROTECTED_TOOLS_DEFAULT = "search_documents,tool-e31645ef-1b8f-4d1d-927f-98797d80d938"  # Name + ID for certainty
-PROTECTED_TOOLS = os.environ.get("PROTECTED_TOOLS", PROTECTED_TOOLS_DEFAULT)
+# DEPRECATED: Protection is now handled by the toolselector's NEVER_DETACH_TOOLS.
+# This is kept only as a local fallback. The toolselector is the single source of truth.
+# To add protected tools, update NEVER_DETACH_TOOLS in the toolselector compose.yaml.
+PROTECTED_TOOLS = os.environ.get("PROTECTED_TOOLS", "")
 
 # Tool attachment configuration
 TOOL_ATTACHMENT_MIN_SCORE = float(os.environ.get("TOOL_ATTACHMENT_MIN_SCORE", "50.0"))

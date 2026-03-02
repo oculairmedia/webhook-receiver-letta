@@ -504,12 +504,13 @@ def webhook_receiver():
                 
                 find_tools_id = get_find_tools_id_with_fallback(agent_id=agent_id)
                 keep_tools_list = ["*", find_tools_id]
-                
-                # Add protected tools to keep list so toolselector never detaches them
+
+                # Protection is handled by the toolselector's NEVER_DETACH_TOOLS.
+                # Local PROTECTED_TOOLS is kept as optional fallback only.
                 from .config import PROTECTED_TOOLS
                 if PROTECTED_TOOLS:
                     keep_tools_list.extend([t.strip() for t in PROTECTED_TOOLS.split(',') if t.strip()])
-                
+
                 keep_tools_str = ",".join(keep_tools_list)
                 
                 from .config import TOOL_ATTACHMENT_MIN_SCORE, TOOL_ATTACHMENT_LIMIT
@@ -523,7 +524,12 @@ def webhook_receiver():
                     request_heartbeat=False,
                     return_structured=True
                 )
-                print(f"[AUTO_TOOL_ATTACHMENT] Tool attachment result: {tool_attachment_data}")
+                # Check for fail-closed abort from wildcard expansion
+                if isinstance(tool_attachment_data, dict) and tool_attachment_data.get('error') == 'wildcard_expansion_failed':
+                    print(f"[AUTO_TOOL_ATTACHMENT] ABORTED: {tool_attachment_data.get('message', 'wildcard expansion failed')}")
+                    tool_attachment_data = None  # Treat as no-op, existing tools preserved
+                else:
+                    print(f"[AUTO_TOOL_ATTACHMENT] Tool attachment result: {tool_attachment_data}")
             except Exception as e:
                 print(f"[AUTO_TOOL_ATTACHMENT] Error during tool attachment: {e}")
             # Don't fail the whole webhook if tool attachment fails
