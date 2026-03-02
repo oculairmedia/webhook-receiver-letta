@@ -20,8 +20,6 @@ CATEGORY_MAPPING = {
     "ghost": "Content Publishing",
     "postiz": "Social Media",
     "huly": "Project Management",
-    "vibekanban": "Project Management",
-    "vibekanban_system": "Project Management",
     "filesystem": "Filesystem",
     "penpot": "Design",
     "photoprism": "Media",
