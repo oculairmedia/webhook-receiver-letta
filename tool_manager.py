@@ -124,10 +124,11 @@ def find_attach_tools(query: str = None, agent_id: str = None, keep_tools: str =
                 keep_tool_ids_list.remove("*")
     
     payload: Dict[str, Any] = {
-        "limit": limit, # Using the passed limit, which has a default in signature
-        "min_score": min_score, # Using the passed min_score, which has a default
+        "limit": limit,
+        "min_score": min_score,
         "keep_tools": keep_tool_ids_list, 
-        "request_heartbeat": request_heartbeat
+        "request_heartbeat": request_heartbeat,
+        "skip_loop_trigger": True,
     }
     
     if query is not None:

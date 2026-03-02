@@ -16,7 +16,8 @@ GRAPHITI_MAX_NODES = int(os.environ.get("GRAPHITI_MAX_NODES", "8"))
 GRAPHITI_MAX_FACTS = int(os.environ.get("GRAPHITI_MAX_FACTS", "20"))
 
 # Maximum context snippet length for cumulative context
-MAX_CONTEXT_SNIPPET_LENGTH = 6000
+# Letta now supports 20K char blocks. Using 8000 to keep context useful without bloat.
+MAX_CONTEXT_SNIPPET_LENGTH = 8000
 
 # Protected tools configuration
 # These tools should always be attached to agents and never detached

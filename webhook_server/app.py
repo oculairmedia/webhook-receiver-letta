@@ -106,6 +106,9 @@ def reset_agent_tracker():
 GRAPHITI_API_URL = os.environ.get("GRAPHITI_URL", "http://192.168.50.90:8003")
 DEFAULT_MAX_NODES = int(os.environ.get("GRAPHITI_MAX_NODES", "8"))
 DEFAULT_MAX_FACTS = int(os.environ.get("GRAPHITI_MAX_FACTS", "20"))
+# RRF scores are reciprocal ranks (typical range 0.005-0.02). Thresholds filter only the worst noise.
+MIN_FACT_SCORE = float(os.environ.get("GRAPHITI_MIN_FACT_SCORE", "0.008"))
+MIN_NODE_SCORE = float(os.environ.get("GRAPHITI_MIN_NODE_SCORE", "0.008"))
 
 import re
 
@@ -190,22 +193,28 @@ def should_skip_tool_attachment(prompt: str) -> bool:
     return False
 
 def fetch_recent_episodes(agent_id: str, last_n: int = 3) -> list:
-    try:
-        url = f"{GRAPHITI_API_URL}/episodes/{agent_id}"
-        resp = requests.get(url, params={"last_n": last_n}, timeout=10)
-        resp.raise_for_status()
-        episodes = resp.json().get("episodes", [])
-        print(f"[GRAPHITI] Fetched {len(episodes)} recent episodes for {agent_id}")
-        return episodes
-    except Exception as e:
-        print(f"[GRAPHITI] Episode fetch failed for {agent_id}: {e}")
-        return []
+    """Fetch recent episodes, trying claude_conversations first (main group), then agent-specific."""
+    for group_id in ["claude_conversations", agent_id]:
+        try:
+            url = f"{GRAPHITI_API_URL}/episodes/{group_id}"
+            resp = requests.get(url, params={"last_n": last_n}, timeout=10)
+            resp.raise_for_status()
+            episodes = resp.json().get("episodes", [])
+            if episodes:
+                print(f"[GRAPHITI] Fetched {len(episodes)} recent episodes from group '{group_id}'")
+                return episodes
+        except Exception as e:
+            print(f"[GRAPHITI] Episode fetch failed for group '{group_id}': {e}")
+            continue
+    print(f"[GRAPHITI] No episodes found in any group for agent {agent_id}")
+    return []
 
 
 def query_graphiti_api(query: str, max_nodes: int = None, max_facts: int = None) -> dict:
     """
     Query the Graphiti search API for context with robust timeout and retry handling.
     Uses separate /search (facts) and /search/nodes endpoints.
+    Enhanced with: score filtering, temporal filtering, community_boost for nodes.
     """
     if max_nodes is None:
         max_nodes = DEFAULT_MAX_NODES
@@ -213,10 +222,8 @@ def query_graphiti_api(query: str, max_nodes: int = None, max_facts: int = None)
         max_facts = DEFAULT_MAX_FACTS
         
     try:
-        # Handle empty or None graphiti_url
         graphiti_url = GRAPHITI_API_URL
         if not graphiti_url:
-            print(f"[GRAPHITI] Warning: Empty graphiti_url provided, using default")
             graphiti_url = "http://192.168.50.90:8003"
         
         # Configure session with retry logic
@@ -235,9 +242,11 @@ def query_graphiti_api(query: str, max_nodes: int = None, max_facts: int = None)
         nodes = []
         edges = []
         
-        search_config = {
+        # Base search config: all 4 methods + RRF fusion
+        facts_search_config = {
             "search_methods": ["fulltext", "similarity", "hipporag", "bfs"],
             "reranker": "rrf",
+            "similarity_threshold": 0.25,
             "hipporag_max_hops": 2,
             "hipporag_decay": 0.85,
             "hipporag_seed_count": 10,
@@ -249,67 +258,84 @@ def query_graphiti_api(query: str, max_nodes: int = None, max_facts: int = None)
             "bfs_min_score_cutoff": 0.1
         }
         
+        # Node search config: adds community_boost for cluster-aware retrieval
+        node_search_config = {
+            **facts_search_config,
+            "search_methods": ["fulltext", "similarity", "hipporag", "bfs", "community_boost"],
+            "similarity_threshold": 0.3,
+        }
+        
+        # Query facts (edges/relationships)
         try:
             facts_url = f"{graphiti_url}/search"
-            facts_payload = {"query": query, "max_facts": max_facts, "config": search_config}
-            print(f"[GRAPHITI] Querying facts at {facts_url} with BFS+HippoRAG")
+            facts_payload = {"query": query, "max_facts": max_facts, "config": facts_search_config}
+            print(f"[GRAPHITI] Querying facts with fulltext+similarity+hipporag+bfs")
             facts_response = session.post(facts_url, json=facts_payload, timeout=30)
             facts_response.raise_for_status()
             facts_results = facts_response.json()
             edges = facts_results.get("facts", [])
-            print(f"[GRAPHITI] Got {len(edges)} facts")
+            print(f"[GRAPHITI] Got {len(edges)} raw facts")
         except Exception as e:
             print(f"[GRAPHITI] Facts query failed: {e}")
         
+        # Query nodes (entities) with community_boost
         try:
             nodes_url = f"{graphiti_url}/search/nodes"
-            nodes_payload = {"query": query, "max_nodes": max_nodes, "config": search_config}
-            print(f"[GRAPHITI] Querying nodes at {nodes_url} with BFS+HippoRAG")
+            nodes_payload = {"query": query, "max_nodes": max_nodes, "config": node_search_config}
+            print(f"[GRAPHITI] Querying nodes with fulltext+similarity+hipporag+bfs+community_boost")
             nodes_response = session.post(nodes_url, json=nodes_payload, timeout=30)
             nodes_response.raise_for_status()
             nodes_results = nodes_response.json()
             nodes = nodes_results.get("nodes", [])
-            print(f"[GRAPHITI] Got {len(nodes)} nodes")
+            print(f"[GRAPHITI] Got {len(nodes)} raw nodes")
         except Exception as e:
             print(f"[GRAPHITI] Nodes query failed: {e}")
         
-        print(f"[GRAPHITI] Results: {len(nodes)} nodes, {len(edges)} edges")
+        # --- QUALITY FILTERING ---
+        
+        # Filter facts by score threshold
+        pre_filter_edges = len(edges)
+        edges = [e for e in edges if e.get("score", 0) >= MIN_FACT_SCORE]
+        
+        # Filter invalidated facts (temporal filtering)
+        edges = [e for e in edges if not e.get("invalid_at")]
+        print(f"[GRAPHITI] Facts after filtering: {len(edges)} of {pre_filter_edges} (score>={MIN_FACT_SCORE}, valid only)")
+        
+        # Filter nodes by score threshold (only if score is present)
+        pre_filter_nodes = len(nodes)
+        nodes = [n for n in nodes if n.get("score", MIN_NODE_SCORE) >= MIN_NODE_SCORE]
+        print(f"[GRAPHITI] Nodes after filtering: {len(nodes)} of {pre_filter_nodes} (score>={MIN_NODE_SCORE})")
+        
+        # --- FORMAT CONTEXT ---
         
         context_parts = []
         
-        # Process nodes
         if nodes:
             nodes_to_process = nodes[:max_nodes]
-            print(f"[GRAPHITI] Processing {len(nodes_to_process)} of {len(nodes)} nodes (max_nodes={max_nodes})")
             for node in nodes_to_process:
                 node_name = node.get('name', 'N/A')
                 node_summary = node.get('summary', 'N/A')
                 context_parts.append(f"Node: {node_name}\nSummary: {node_summary}")
         
-        # Process edges as facts
         if edges:
             edges_to_process = edges[:max_facts]
-            print(f"[GRAPHITI] Processing {len(edges_to_process)} of {len(edges)} edges (max_facts={max_facts})")
             seen_facts = set()
             for edge in edges_to_process:
                 fact_text = edge.get('fact', edge.get('name', 'N/A'))
                 if fact_text not in seen_facts and fact_text != 'N/A':
                     seen_facts.add(fact_text)
                     context_parts.append(f"Fact: {fact_text}")
-            
             print(f"[GRAPHITI] After deduplication: {len(seen_facts)} unique facts")
         
         if not context_parts:
-            fallback_msg = f"No relevant information found in Graphiti for query: '{query}' (limit: {max_nodes})"
-            print(f"[GRAPHITI] No context found: {fallback_msg}")
+            fallback_msg = f"No relevant information found in Graphiti for query: '{query[:80]}'"
+            print(f"[GRAPHITI] No context found after filtering")
             return {"context": fallback_msg, "success": False}
         
         final_context = "Relevant Entities from Knowledge Graph:\n" + "\n\n".join(context_parts)
-        print(f"[GRAPHITI] Generated context length: {len(final_context)} characters")
+        print(f"[GRAPHITI] Generated context: {len(final_context)} chars, {len(nodes)} nodes, {len(edges)} facts")
         
-        # Clean up session
         session.close()
-        
         return {"context": final_context, "success": True}
         
     except requests.exceptions.RequestException as e:
@@ -421,16 +447,23 @@ def webhook_receiver():
             print(f"[WEBHOOK_DEBUG] Missing agent_id or prompt - returning 400")
             return jsonify({"error": "Could not extract agent_id or prompt from webhook."}), 400
 
-        # Generate context based on the prompt
-        context_result = generate_context_from_prompt(prompt, agent_id)
-        
-        # Create or update the memory block with the new context (agent-specific)
-        block_data = {
-            "label": f"graphiti_context_{agent_id}",
-            "value": context_result.get("context", ""),
-            "metadata": {"source": "webhook", "event_type": event_type}
-        }
-        create_memory_block(block_data, agent_id)
+        # Skip context generation for trivial messages (reuse tool attachment skip logic)
+        if should_skip_tool_attachment(prompt):
+            print(f"[CONTEXT_GEN] Skipping context generation - trivial message detected")
+        else:
+            # Generate context based on the prompt
+            context_result = generate_context_from_prompt(prompt, agent_id)
+            
+            # Create or update the memory block with the new context (agent-specific)
+            if context_result.get("success"):
+                block_data = {
+                    "label": f"graphiti_context_{agent_id}",
+                    "value": context_result.get("context", ""),
+                    "metadata": {"source": "webhook", "event_type": event_type}
+                }
+                create_memory_block(block_data, agent_id)
+            else:
+                print(f"[CONTEXT_GEN] Skipping memory block update - no useful context generated")
 
         # Agent discovery - find relevant agents for collaboration
         try:

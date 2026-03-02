@@ -3,8 +3,8 @@ import re
 from datetime import datetime, UTC
 
 # Maximum context snippet length for cumulative context
-# Set to 4800 to stay well under Letta's 5000 character API limit
-MAX_CONTEXT_SNIPPET_LENGTH = 4800
+# Letta now supports 20K char blocks. Using 8000 to keep context useful without bloat.
+MAX_CONTEXT_SNIPPET_LENGTH = 8000
 
 def _build_cumulative_context(existing_context: str, new_context: str) -> str:
     """
