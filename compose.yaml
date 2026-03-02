@@ -29,7 +29,7 @@ services:
       - DEBUG_MODE=${DEBUG_MODE:-false}
     restart: unless-stopped
     labels:
-      - homepage.group=AI & Automation
+      - homepage.group=Letta Ecosystem
       - homepage.name=Letta Webhook Receiver
       - homepage.icon=si-fastapi
       - homepage.href=http://192.168.50.90:5005
@@ -41,6 +41,7 @@ services:
   weaviate:
     image: semitechnologies/weaviate:1.25.0
     container_name: agent-registry-weaviate
+    init: true
     ports:
       - 8092:8080
       - 50052:50051
@@ -53,6 +54,7 @@ services:
     volumes:
       - weaviate_data:/var/lib/weaviate
     restart: unless-stopped
+    stop_grace_period: 120s
     networks:
       - agent-registry-network
     healthcheck:
@@ -65,12 +67,18 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
     labels:
-      - homepage.group=Search & Data
+      - homepage.group=Letta Ecosystem
       - homepage.name=Weaviate Vector DB
-      - homepage.icon=si-elasticsearch
+      - homepage.icon=mdi-database-search
       - homepage.href=http://192.168.50.90:8092
       - homepage.description=Vector database for agent embeddings
+      - homepage.enable=false
   # Agent Registry Service
   agent-registry:
     build:
@@ -91,11 +99,12 @@ services:
         condition: service_healthy
     restart: unless-stopped
     labels:
-      - homepage.group=AI & Automation
+      - homepage.group=Letta Ecosystem
       - homepage.name=Agent Registry
       - homepage.icon=si-python
       - homepage.href=http://192.168.50.90:8021
       - homepage.description=Agent registry and discovery service
+      - homepage.enable=false
     networks:
       - agent-registry-network
       - letta-network
@@ -143,11 +152,12 @@ services:
       - agent-registry
     restart: unless-stopped
     labels:
-      - homepage.group=AI & Automation
+      - homepage.group=Letta Ecosystem
       - homepage.name=Agent Registry MCP
       - homepage.icon=si-python
       - homepage.href=http://192.168.50.90:8022
       - homepage.description=MCP server for agent registry
+      - homepage.enable=false
     networks:
       - agent-registry-network
     healthcheck:
